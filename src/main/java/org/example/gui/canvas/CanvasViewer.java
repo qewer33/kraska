@@ -18,7 +18,6 @@ public class CanvasViewer extends JScrollPane {
         // Create wrapper panel to center the canvas and add border
         JPanel canvasWrapper = new JPanel(new GridBagLayout());
         canvasWrapper.setBackground(Color.DARK_GRAY);
-        canvasWrapper.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
         canvasWrapper.add(canvas);
 
         setViewportView(canvasWrapper);

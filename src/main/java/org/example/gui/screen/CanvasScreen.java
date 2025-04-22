@@ -76,14 +76,14 @@ public class CanvasScreen extends AbstractScreen {
 
         // === Brush Size Slider ===
         JLabel brushLabel = new JLabel("Brush Size:");
+        JLabel brushValueLabel = new JLabel(brushTool.getSize() + "px");
         JSlider brushSlider = new JSlider(1, 50, brushTool.getSize());
         brushSlider.setPreferredSize(new Dimension(120, 40)); // Limit width
-        brushSlider.setMajorTickSpacing(10);
-        brushSlider.setMinorTickSpacing(1);
-        brushSlider.setPaintTicks(true);
-        brushSlider.setPaintLabels(false); // Optional: less visual clutter
+        brushSlider.setPaintTicks(false);
+        brushSlider.setPaintLabels(false);
         brushSlider.addChangeListener(e -> {
             brushTool.setSize(brushSlider.getValue());
+            brushValueLabel.setText(brushTool.getSize() + "px");
         });
 
         // === Add to toolbar ===
@@ -92,6 +92,7 @@ public class CanvasScreen extends AbstractScreen {
         toolbar.add(secondaryColorBtn);
         toolbar.addSeparator(new Dimension(20, 0));
         toolbar.add(brushLabel);
+        toolbar.add(brushValueLabel);
         toolbar.add(brushSlider);
 
         return toolbar;

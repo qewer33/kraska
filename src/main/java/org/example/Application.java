@@ -1,5 +1,6 @@
 package org.example;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import org.example.gui.screen.CanvasScreen;
 
 import javax.swing.*;
@@ -7,8 +8,21 @@ import java.awt.*;
 
 public class Application {
     public void run() {
-        JFrame mainWindow = createMainWindow();
-        mainWindow.setVisible(true);
+        setupTheme();
+
+        SwingUtilities.invokeLater(() -> {
+            JFrame mainWindow = createMainWindow();
+            mainWindow.setVisible(true);
+        });
+    }
+
+    private void setupTheme() {
+        try {
+            // Set FlatLaf theme before any Swing components are created
+            UIManager.setLookAndFeel(new FlatLightLaf());
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
     }
 
     private JFrame createMainWindow() {
