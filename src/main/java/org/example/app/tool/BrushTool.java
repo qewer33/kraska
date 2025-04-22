@@ -21,22 +21,24 @@ public class BrushTool extends AbstractTool implements CanvasPainter {
 
     @Override
     public void onMousePress(Canvas canvas, MouseEvent e) {
-        lastPoint = e.getPoint();
-        draw(canvas, e.getPoint(), e.getPoint()); // Draw initial dot
+        if (e.getButton() == MouseEvent.BUTTON1) {
+            lastPoint = canvas.getUnzoomedPoint(e.getPoint());
+            draw(canvas, lastPoint, lastPoint);
+        }
     }
 
     @Override
     public void onMouseDrag(Canvas canvas, MouseEvent e) {
         if (lastPoint != null) {
-            draw(canvas, lastPoint, e.getPoint());
-            lastPoint = e.getPoint();
+            Point current = canvas.getUnzoomedPoint(e.getPoint());
+            draw(canvas, lastPoint, current);
+            lastPoint = current;
         }
     }
 
     @Override
     public void onMouseRelease(Canvas canvas, MouseEvent e) {
-        if (lastPoint != null) {
-            draw(canvas, lastPoint, e.getPoint()); // Finalize line
+        if (e.getButton() == MouseEvent.BUTTON1) {
             lastPoint = null;
         }
     }

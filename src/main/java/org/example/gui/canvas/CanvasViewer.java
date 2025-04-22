@@ -6,87 +6,109 @@ import java.awt.event.*;
 
 public class CanvasViewer extends JScrollPane {
     private final Canvas canvas;
+    private final JPanel canvasWrapper;
     private double zoomFactor = 1.0;
+
     private Point panStartPoint;
+    private Point viewStartPoint;
 
     public CanvasViewer(Canvas canvas) {
-        super(canvas);
+        super();
         this.canvas = canvas;
+
+        // Create wrapper panel to center the canvas and add border
+        canvasWrapper = new JPanel(new GridBagLayout());
+        canvasWrapper.setBackground(Color.DARK_GRAY);
+        canvasWrapper.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+        canvasWrapper.add(canvas);
+
+        setViewportView(canvasWrapper);
+        setWheelScrollingEnabled(false); // We'll handle scroll/zoom ourselves
         setupViewer();
     }
 
     private void setupViewer() {
-        // Basic setup
         setPreferredSize(new Dimension(800, 600));
         getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
 
-        // Enable mouse wheel for future zooming
+        // Still add wheel listener to viewer
         addMouseWheelListener(this::handleMouseWheel);
 
-        // Setup panning listeners (for future implementation)
-        addMouseListener(new MouseAdapter() {
+        // 🔁 Middle mouse panning — now added to the canvas
+        canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) { // Middle mouse button
+                if (SwingUtilities.isMiddleMouseButton(e)) {
                     panStartPoint = e.getPoint();
-                    setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                    viewStartPoint = getViewport().getViewPosition();
+                    canvas.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                    e.consume(); // prevent paint tools from triggering
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON2) {
+                if (SwingUtilities.isMiddleMouseButton(e)) {
                     panStartPoint = null;
-                    setCursor(Cursor.getDefaultCursor());
+                    viewStartPoint = null;
+                    canvas.setCursor(Cursor.getDefaultCursor());
+                    e.consume();
                 }
             }
         });
 
-        addMouseMotionListener(new MouseMotionAdapter() {
+        canvas.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (panStartPoint != null) {
+                if (panStartPoint != null && viewStartPoint != null) {
                     handlePanning(e.getPoint());
+                    e.consume();
                 }
             }
         });
     }
 
-    // Placeholder for zoom functionality
     private void handleMouseWheel(MouseWheelEvent e) {
-        // Will implement zooming later
-        // For now, just scroll vertically
-        JScrollBar vertical = getVerticalScrollBar();
-        vertical.setValue(vertical.getValue() + e.getWheelRotation() * vertical.getUnitIncrement());
+        if (e.isControlDown()) {
+            double delta = -e.getPreciseWheelRotation() * 0.1;
+            double newZoom = Math.max(0.1, zoomFactor + delta);
+            setZoomFactor(newZoom);
+        } else {
+            JScrollBar vertical = getVerticalScrollBar();
+            vertical.setValue(vertical.getValue() + e.getWheelRotation() * vertical.getUnitIncrement());
+        }
     }
 
-    // Placeholder for panning functionality
-    private void handlePanning(Point currentPoint) {
-        // Will implement proper panning later
+    private void handlePanning(Point currentMouse) {
+        int dx = panStartPoint.x - currentMouse.x;
+        int dy = panStartPoint.y - currentMouse.y;
+
+        int newX = viewStartPoint.x + dx;
+        int newY = viewStartPoint.y + dy;
+
+        // Clamp to bounds
         JViewport viewport = getViewport();
-        Point viewPosition = viewport.getViewPosition();
-        int dx = panStartPoint.x - currentPoint.x;
-        int dy = panStartPoint.y - currentPoint.y;
+        Dimension viewSize = viewport.getViewSize();
+        Dimension extentSize = viewport.getExtentSize();
 
-        viewport.setViewPosition(new Point(
-                viewPosition.x + dx,
-                viewPosition.y + dy
-        ));
+        newX = Math.max(0, Math.min(viewSize.width - extentSize.width, newX));
+        newY = Math.max(0, Math.min(viewSize.height - extentSize.height, newY));
 
-        panStartPoint = currentPoint;
+        viewport.setViewPosition(new Point(newX, newY));
     }
 
-    public Canvas getCanvas() {
-        return canvas;
+    public void setZoomFactor(double zoomFactor) {
+        this.zoomFactor = zoomFactor;
+        canvas.setZoomFactor(zoomFactor);
+        canvas.revalidate();
+        canvas.repaint();
     }
 
     public double getZoomFactor() {
         return zoomFactor;
     }
 
-    // Will be used for zoom implementation later
-    public void setZoomFactor(double zoomFactor) {
-        this.zoomFactor = zoomFactor;
-        // Future zoom implementation will go here
+    public Canvas getCanvas() {
+        return canvas;
     }
 }

@@ -14,7 +14,7 @@ public class Application {
     private JFrame createMainWindow() {
         JFrame frame = new JFrame("Kraska");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(600, 600);
+        frame.setSize(1280, 720);
         frame.setLayout(new BorderLayout());
         frame.add(new CanvasScreen(), BorderLayout.CENTER);
         return frame;

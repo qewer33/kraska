@@ -11,11 +11,13 @@ import java.util.Stack;
 
 public class Canvas extends JPanel {
     // Drawing properties
+    private Dimension logicalSize = new Dimension(800, 600);
     private BufferedImage canvas;
     private BufferedImage temporaryDrawing;
     private Color currentColor = Color.BLACK;
     private int brushSize = 5;
     private Color backgroundColor = Color.WHITE;
+    private double zoomFactor = 1.0;
 
     // Tool system
     private ToolManager toolManager;
@@ -28,11 +30,11 @@ public class Canvas extends JPanel {
     private Stack<BufferedImage> redoStack = new Stack<>();
 
     public Canvas() {
+        setPreferredSize(new Dimension(800, 600));
         setBackground(backgroundColor);
         initializeToolSystem();
         initializeCanvas();
         setupMouseListeners();
-        setPreferredSize(new Dimension(800, 600));
     }
 
     private void initializeToolSystem() {
@@ -43,17 +45,24 @@ public class Canvas extends JPanel {
     }
 
     private void initializeCanvas() {
-        canvas = new BufferedImage(getPreferredSize().width, getPreferredSize().height,
-                BufferedImage.TYPE_INT_ARGB);
+        canvas = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
         clearCanvas();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+
+        // Apply zoom (scale)
+        g2d.scale(zoomFactor, zoomFactor);
+
+        // Draw canvas image
         if (canvas != null) {
-            g.drawImage(canvas, 0, 0, this);
+            g2d.drawImage(canvas, 0, 0, null);
         }
+
+        g2d.dispose();
     }
 
     // ===================
@@ -226,6 +235,19 @@ public class Canvas extends JPanel {
         return toolManager;
     }
 
+    public void setZoomFactor(double zoomFactor) {
+        this.zoomFactor = zoomFactor;
+        repaint();
+    }
+
+    public void setLogicalSize(Dimension logicalSize) {
+        this.logicalSize = logicalSize;
+    }
+
+    public Dimension getLogicalSize() {
+        return new Dimension(logicalSize);
+    }
+
     // ===================
     // Utility Methods for Tools
     // ===================
@@ -241,5 +263,19 @@ public class Canvas extends JPanel {
 
     public Dimension getCanvasSize() {
         return new Dimension(canvas.getWidth(), canvas.getHeight());
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(
+                (int) (logicalSize.width * zoomFactor),
+                (int) (logicalSize.height * zoomFactor)
+        );
+    }
+
+    public Point getUnzoomedPoint(Point zoomedPoint) {
+        int x = (int) (zoomedPoint.x / zoomFactor);
+        int y = (int) (zoomedPoint.y / zoomFactor);
+        return new Point(x, y);
     }
 }
