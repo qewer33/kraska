@@ -1,6 +1,6 @@
 package org.example.app.tool;
 
-import org.example.gui.canvas.Canvas;
+import org.example.app.color.ColorManager;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -8,11 +8,21 @@ import java.util.Map;
 
 public class ToolManager {
     private final Map<String, AbstractTool> tools = new HashMap<>();
-    private final Canvas canvas;
+    private AbstractTool activeTool;
 
-    public ToolManager(Canvas canvas) {
-        this.canvas = canvas;
+    // Singleton design pattern for manager classes
+    private static ToolManager instance;
+
+    public static ToolManager getInstance() {
+        if (instance == null) {
+            instance = new ToolManager("Brush");
+        }
+        return instance;
+    }
+
+    private ToolManager(String toolName) {
         registerDefaultTools();
+        getActiveTool(toolName);
     }
 
     private void registerDefaultTools() {
@@ -24,10 +34,18 @@ public class ToolManager {
         tools.put(tool.getName(), tool);
     }
 
-    public void activateTool(String toolName) {
+    public AbstractTool getTool(String toolName) {
+        return tools.get(toolName);
+    }
+
+    public void getActiveTool(String toolName) {
         AbstractTool tool = tools.get(toolName);
         if (tool != null) {
-            canvas.setCurrentTool(tool);
+            activeTool = tool;
         }
+    }
+
+    public AbstractTool getActiveTool() {
+        return activeTool;
     }
 }

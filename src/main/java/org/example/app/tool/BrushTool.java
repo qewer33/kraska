@@ -1,5 +1,6 @@
 package org.example.app.tool;
 
+import org.example.app.color.ColorManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
 
@@ -9,19 +10,23 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 public class BrushTool extends AbstractTool implements CanvasPainter {
+    private final ColorManager colorManager;
     private Color color;
     private int size;
     private Point lastPoint;
 
     public BrushTool(Color defaultColor, int defaultSize) {
         super("Brush");
-        this.color = defaultColor;
+        colorManager = ColorManager.getInstance();
+        this.color = colorManager.getPrimary();
         this.size = defaultSize;
     }
 
     @Override
     public void onMousePress(Canvas canvas, MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
+        if (e.getButton() == MouseEvent.BUTTON1 || e.getButton() == MouseEvent.BUTTON3) {
+            this.color = e.getButton() == MouseEvent.BUTTON1 ? colorManager.getPrimary() : colorManager.getSecondary();
+
             lastPoint = canvas.getUnzoomedPoint(e.getPoint());
             draw(canvas, lastPoint, lastPoint);
         }
@@ -38,7 +43,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter {
 
     @Override
     public void onMouseRelease(Canvas canvas, MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
+        if (e.getButton() == MouseEvent.BUTTON1 || e.getButton() == MouseEvent.BUTTON3) {
             lastPoint = null;
         }
     }
@@ -65,8 +70,8 @@ public class BrushTool extends AbstractTool implements CanvasPainter {
         canvas.repaint();
     }
 
-    public void setColor(Color color) {
-        this.color = color;
+    public int getSize() {
+        return this.size;
     }
 
     public void setSize(int size) {

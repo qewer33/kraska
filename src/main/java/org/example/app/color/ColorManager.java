@@ -6,9 +6,25 @@ public class ColorManager {
     private Color primary;
     private Color secondary;
 
-    public ColorManager(Color primary, Color secondary) {
+    // Singleton design pattern for manager classes
+    private static ColorManager instance;
+
+    public static ColorManager getInstance() {
+        if (instance == null) {
+            instance = new ColorManager(Color.BLACK, Color.WHITE);
+        }
+        return instance;
+    }
+
+    private ColorManager(Color primary, Color secondary) {
         this.primary = primary;
         this.secondary = secondary;
+    }
+
+    public void swap() {
+        Color temp = primary;
+        primary = secondary;
+        secondary = temp;
     }
 
     public Color getPrimary() {

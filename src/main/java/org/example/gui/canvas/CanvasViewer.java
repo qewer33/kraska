@@ -6,7 +6,6 @@ import java.awt.event.*;
 
 public class CanvasViewer extends JScrollPane {
     private final Canvas canvas;
-    private final JPanel canvasWrapper;
     private double zoomFactor = 1.0;
 
     private Point panStartPoint;
@@ -17,7 +16,7 @@ public class CanvasViewer extends JScrollPane {
         this.canvas = canvas;
 
         // Create wrapper panel to center the canvas and add border
-        canvasWrapper = new JPanel(new GridBagLayout());
+        JPanel canvasWrapper = new JPanel(new GridBagLayout());
         canvasWrapper.setBackground(Color.DARK_GRAY);
         canvasWrapper.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
         canvasWrapper.add(canvas);

@@ -1,6 +1,6 @@
 package org.example.gui.canvas;
 
-import org.example.app.tool.AbstractTool;
+import org.example.app.color.ColorManager;
 import org.example.app.tool.ToolManager;
 
 import javax.swing.*;
@@ -10,38 +10,27 @@ import java.awt.image.*;
 import java.util.Stack;
 
 public class Canvas extends JPanel {
-    // Drawing properties
     private Dimension logicalSize = new Dimension(800, 600);
     private BufferedImage canvas;
-    private BufferedImage temporaryDrawing;
-    private Color currentColor = Color.BLACK;
-    private int brushSize = 5;
-    private Color backgroundColor = Color.WHITE;
     private double zoomFactor = 1.0;
 
-    // Tool system
-    private ToolManager toolManager;
-    private AbstractTool currentTool;
+    // Managers
+    private final ColorManager colorManager;
+    private final ToolManager toolManager;
 
     // State management
     private MouseEvent lastEvent;
     private boolean isDrawing = false;
-    private Stack<BufferedImage> undoStack = new Stack<>();
-    private Stack<BufferedImage> redoStack = new Stack<>();
+    private final Stack<BufferedImage> undoStack = new Stack<>();
+    private final Stack<BufferedImage> redoStack = new Stack<>();
 
     public Canvas() {
+        colorManager = ColorManager.getInstance();
+        toolManager = ToolManager.getInstance();
         setPreferredSize(new Dimension(800, 600));
-        setBackground(backgroundColor);
-        initializeToolSystem();
+        setBackground(Color.WHITE);
         initializeCanvas();
         setupMouseListeners();
-    }
-
-    private void initializeToolSystem() {
-        toolManager = new ToolManager(this);
-
-        // Set default tool
-        toolManager.activateTool("Brush");
     }
 
     private void initializeCanvas() {
@@ -65,59 +54,30 @@ public class Canvas extends JPanel {
         g2d.dispose();
     }
 
-    // ===================
-    // Tool System Methods
-    // ===================
-
-    public void setCurrentTool(AbstractTool tool) {
-        if (currentTool != null) {
-            currentTool.onDeactivate(this);
-        }
-
-        currentTool = tool;
-
-        if (currentTool != null) {
-            currentTool.onActivate(this);
-            updateCursor();
-        }
-    }
-
-    private void updateCursor() {
-        if (currentTool instanceof CanvasPainter) {
-            // Set appropriate cursor for painting tools
-            setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-        } else {
-            setCursor(Cursor.getDefaultCursor());
-        }
-    }
-
-    // ===================
-    // Drawing Operations
-    // ===================
+    // --- DRAWING OPERATIONS ---
 
     public void startDrawing(MouseEvent e) {
-        // saveToUndoStack();
+        saveToUndoStack();
         isDrawing = true;
         lastEvent = e;
 
-        if (currentTool instanceof CanvasPainter) {
-            ((CanvasPainter) currentTool).onMousePress(this, e);
+        if (toolManager.getActiveTool() instanceof CanvasPainter) {
+            ((CanvasPainter) toolManager.getActiveTool()).onMousePress(this, e);
         }
     }
 
     public void continueDrawing(MouseEvent e) {
-        if (isDrawing && currentTool instanceof CanvasPainter) {
-            ((CanvasPainter) currentTool).onMouseDrag(this, e);
+        if (isDrawing && toolManager.getActiveTool() instanceof CanvasPainter) {
+            ((CanvasPainter) toolManager.getActiveTool()).onMouseDrag(this, e);
         }
     }
 
     public void finishDrawing() {
-        if (isDrawing && currentTool instanceof CanvasPainter) {
-            ((CanvasPainter) currentTool).onMouseRelease(this, lastEvent);
+        if (isDrawing && toolManager.getActiveTool() instanceof CanvasPainter) {
+            ((CanvasPainter) toolManager.getActiveTool()).onMouseRelease(this, lastEvent);
         }
         isDrawing = false;
         lastEvent = null;
-        temporaryDrawing = null;
     }
 
     public void applyImageOperation(BufferedImageOp op) {
@@ -129,9 +89,7 @@ public class Canvas extends JPanel {
         repaint();
     }
 
-    // ===================
-    // Canvas State Management
-    // ===================
+    // --- CANVAS STATE MANAGEMENT ---
 
     private void saveToUndoStack() {
         BufferedImage copy = new BufferedImage(
@@ -171,15 +129,13 @@ public class Canvas extends JPanel {
     public void clearCanvas() {
         saveToUndoStack();
         Graphics2D g2d = canvas.createGraphics();
-        g2d.setColor(backgroundColor);
+        g2d.setColor(colorManager.getSecondary());
         g2d.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         g2d.dispose();
         repaint();
     }
 
-    // ===================
-    // Mouse Listeners
-    // ===================
+    // --- MOUSE LISTENERS ---
 
     private void setupMouseListeners() {
         addMouseListener(new MouseAdapter() {
@@ -203,62 +159,10 @@ public class Canvas extends JPanel {
         });
     }
 
-    // ===================
-    // Getters and Setters
-    // ===================
-
-    public BufferedImage getCanvasImage() {
-        return canvas;
-    }
-
-    public void setCurrentColor(Color color) {
-        this.currentColor = color;
-    }
-
-    public Color getCurrentColor() {
-        return currentColor;
-    }
-
-    public void setBrushSize(int size) {
-        this.brushSize = size;
-    }
-
-    public int getBrushSize() {
-        return brushSize;
-    }
-
-    public void setBackgroundColor(Color color) {
-        this.backgroundColor = color;
-    }
-
-    public ToolManager getToolManager() {
-        return toolManager;
-    }
-
-    public void setZoomFactor(double zoomFactor) {
-        this.zoomFactor = zoomFactor;
-        repaint();
-    }
-
-    public void setLogicalSize(Dimension logicalSize) {
-        this.logicalSize = logicalSize;
-    }
-
-    public Dimension getLogicalSize() {
-        return new Dimension(logicalSize);
-    }
-
-    // ===================
-    // Utility Methods for Tools
-    // ===================
+    // --- UTILITY METHODS ---
 
     public Graphics2D getCanvasGraphics() {
         return canvas.createGraphics();
-    }
-
-    public void setTemporaryDrawing(BufferedImage tempImage) {
-        this.temporaryDrawing = tempImage;
-        repaint();
     }
 
     public Dimension getCanvasSize() {
@@ -277,5 +181,32 @@ public class Canvas extends JPanel {
         int x = (int) (zoomedPoint.x / zoomFactor);
         int y = (int) (zoomedPoint.y / zoomFactor);
         return new Point(x, y);
+    }
+
+    // --- GETTERS AND SETTERS ---
+
+    public BufferedImage getCanvasImage() {
+        return canvas;
+    }
+
+    public ToolManager getToolManager() {
+        return toolManager;
+    }
+
+    public void setZoomFactor(double zoomFactor) {
+        this.zoomFactor = zoomFactor;
+        repaint();
+    }
+
+    public double getZoomFactor() {
+        return zoomFactor;
+    }
+
+    public void setLogicalSize(Dimension logicalSize) {
+        this.logicalSize = logicalSize;
+    }
+
+    public Dimension getLogicalSize() {
+        return new Dimension(logicalSize);
     }
 }
