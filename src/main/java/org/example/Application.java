@@ -1,6 +1,9 @@
 package org.example;
 
+import org.example.gui.screen.CanvasScreen;
+
 import javax.swing.*;
+import java.awt.*;
 
 public class Application {
     public void run() {
@@ -12,6 +15,8 @@ public class Application {
         JFrame frame = new JFrame("Kraska");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(600, 600);
+        frame.setLayout(new BorderLayout());
+        frame.add(new CanvasScreen(), BorderLayout.CENTER);
         return frame;
     }
 }
