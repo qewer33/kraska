@@ -1,6 +1,7 @@
 package org.example;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import org.example.gui.ApplicationMenu;
 import org.example.gui.screen.CanvasScreen;
 
 import javax.swing.*;
@@ -36,6 +37,9 @@ public class Application {
         CanvasScreen canvasScreen = new CanvasScreen();
         frame.add(canvasScreen, BorderLayout.CENTER);
 
+        ApplicationMenu appMenu = new ApplicationMenu();
+        frame.setJMenuBar(appMenu);
+
         // Add a key listener for undo/redo
         frame.addKeyListener(new KeyAdapter() {
             @Override
@@ -46,6 +50,7 @@ public class Application {
                     canvasScreen.getCanvas().redo(); // Trigger redo on CTRL+Y
                 }
             }
+
         });
 
         // Request focus for the frame
@@ -55,7 +60,6 @@ public class Application {
                 frame.requestFocusInWindow();
             }
         });
-
         return frame;
     }
 }
