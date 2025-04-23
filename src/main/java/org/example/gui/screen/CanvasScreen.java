@@ -4,6 +4,7 @@ import org.example.app.color.ColorManager;
 import org.example.app.tool.BrushTool;
 import org.example.app.tool.EyedropperTool;
 import org.example.app.tool.ToolManager;
+import org.example.gui.ApplicationStatusBar;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasViewer;
 
@@ -26,9 +27,10 @@ public class CanvasScreen extends AbstractScreen {
     private JButton primaryColorBtn;
     private JButton secondaryColorBtn;
 
-    public CanvasScreen(int width, int height, Color backgroundColor) {
-        this.canvas = new Canvas(width, height, backgroundColor);
+    public CanvasScreen() {
+        this.canvas = new Canvas();
         this.viewer = new CanvasViewer(this.canvas);
+        ApplicationStatusBar statusBar = new ApplicationStatusBar(this.viewer);
 
         colorManager = ColorManager.getInstance();
         toolManager = ToolManager.getInstance();
@@ -39,7 +41,7 @@ public class CanvasScreen extends AbstractScreen {
         this.setLayout(new BorderLayout());
         this.add(createToolbar(), BorderLayout.NORTH); // Add toolbar at the top
         this.add(viewer, BorderLayout.CENTER);         // Canvas viewer in center
-        // this.add(createSidebar(), BorderLayout.EAST);  // Add sidebar at the right
+        this.add(statusBar, BorderLayout.SOUTH);
 
         setupKeyBindings(); // Setup key bindings
     }
@@ -48,20 +50,11 @@ public class CanvasScreen extends AbstractScreen {
         return canvas;
     }
 
-    private JPanel createSidebar() {
-        JPanel sidebar = new JPanel();
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setPreferredSize(new Dimension(200, 0));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        return sidebar;
-    }
-
-
     private JToolBar createToolbar() {
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
         toolbar.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5)); // Add spacing
+
 
         // === Tool Buttons ===
         JToggleButton brushBtn = new JToggleButton("Brush");
