@@ -24,18 +24,27 @@ public class Canvas extends JPanel {
     private final Stack<BufferedImage> undoStack = new Stack<>();
     private final Stack<BufferedImage> redoStack = new Stack<>();
 
-    public Canvas() {
+    public Canvas(int width, int height, Color backgroundColor) {
         colorManager = ColorManager.getInstance();
         toolManager = ToolManager.getInstance();
-        setPreferredSize(new Dimension(800, 600));
-        setBackground(Color.WHITE);
-        initializeCanvas();
+        this.logicalSize = new Dimension(width, height);
+        setPreferredSize(logicalSize);
+        setBackground(backgroundColor); // Set the background color
+        initializeCanvas(backgroundColor);
         setupMouseListeners();
     }
 
     private void initializeCanvas() {
         canvas = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
         clearCanvas();
+    }
+
+    private void initializeCanvas(Color backgroundColor) {
+        canvas = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = canvas.createGraphics();
+        g2d.setColor(backgroundColor); // Fill the canvas with the background color
+        g2d.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        g2d.dispose();
     }
 
     @Override

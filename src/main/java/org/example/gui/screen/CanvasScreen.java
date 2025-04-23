@@ -26,8 +26,8 @@ public class CanvasScreen extends AbstractScreen {
     private JButton primaryColorBtn;
     private JButton secondaryColorBtn;
 
-    public CanvasScreen() {
-        this.canvas = new Canvas();
+    public CanvasScreen(int width, int height, Color backgroundColor) {
+        this.canvas = new Canvas(width, height, backgroundColor);
         this.viewer = new CanvasViewer(this.canvas);
 
         colorManager = ColorManager.getInstance();
