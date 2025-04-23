@@ -8,6 +8,7 @@ import org.example.gui.canvas.CanvasViewer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 public class CanvasScreen extends AbstractScreen {
     Canvas canvas;
@@ -31,6 +32,12 @@ public class CanvasScreen extends AbstractScreen {
         this.setLayout(new BorderLayout());
         this.add(createToolbar(), BorderLayout.NORTH); // Add toolbar at the top
         this.add(viewer, BorderLayout.CENTER);         // Canvas viewer in center
+
+        setupKeyBindings(); // Setup key bindings
+    }
+
+    public Canvas getCanvas() {
+        return canvas;
     }
 
     private JToolBar createToolbar() {
@@ -96,6 +103,28 @@ public class CanvasScreen extends AbstractScreen {
         toolbar.add(brushSlider);
 
         return toolbar;
+    }
+
+    private void setupKeyBindings() {
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = this.getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke("control Z"), "undo");
+        inputMap.put(KeyStroke.getKeyStroke("control Y"), "redo");
+
+        actionMap.put("undo", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                canvas.undo(); // Trigger undo
+            }
+        });
+
+        actionMap.put("redo", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                canvas.redo(); // Trigger redo
+            }
+        });
     }
 }
 
