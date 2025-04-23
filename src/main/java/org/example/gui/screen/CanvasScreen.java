@@ -39,6 +39,7 @@ public class CanvasScreen extends AbstractScreen {
         this.setLayout(new BorderLayout());
         this.add(createToolbar(), BorderLayout.NORTH); // Add toolbar at the top
         this.add(viewer, BorderLayout.CENTER);         // Canvas viewer in center
+        // this.add(createSidebar(), BorderLayout.EAST);  // Add sidebar at the right
 
         setupKeyBindings(); // Setup key bindings
     }
@@ -47,11 +48,20 @@ public class CanvasScreen extends AbstractScreen {
         return canvas;
     }
 
+    private JPanel createSidebar() {
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setPreferredSize(new Dimension(200, 0));
+        sidebar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        return sidebar;
+    }
+
+
     private JToolBar createToolbar() {
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
         toolbar.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5)); // Add spacing
-
 
         // === Tool Buttons ===
         JToggleButton brushBtn = new JToggleButton("Brush");
