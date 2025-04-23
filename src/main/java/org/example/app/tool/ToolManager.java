@@ -22,12 +22,12 @@ public class ToolManager {
 
     private ToolManager(String toolName) {
         registerDefaultTools();
-        getActiveTool(toolName);
+        setActiveTool(toolName);
     }
 
     private void registerDefaultTools() {
         registerTool(new BrushTool(Color.BLACK, 5));
-        // registerTool(new BlurTool());
+        registerTool(new EyedropperTool());
     }
 
     public void registerTool(AbstractTool tool) {
@@ -38,7 +38,7 @@ public class ToolManager {
         return tools.get(toolName);
     }
 
-    public void getActiveTool(String toolName) {
+    public void setActiveTool(String toolName) {
         AbstractTool tool = tools.get(toolName);
         if (tool != null) {
             activeTool = tool;

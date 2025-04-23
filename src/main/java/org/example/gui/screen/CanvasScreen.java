@@ -2,6 +2,7 @@ package org.example.gui.screen;
 
 import org.example.app.color.ColorManager;
 import org.example.app.tool.BrushTool;
+import org.example.app.tool.EyedropperTool;
 import org.example.app.tool.ToolManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasViewer;
@@ -19,6 +20,11 @@ public class CanvasScreen extends AbstractScreen {
     private final ToolManager toolManager;
 
     private final BrushTool brushTool;
+    private final EyedropperTool eyedropperTool;
+
+    // Color buttons
+    private JButton primaryColorBtn;
+    private JButton secondaryColorBtn;
 
     public CanvasScreen() {
         this.canvas = new Canvas();
@@ -28,6 +34,7 @@ public class CanvasScreen extends AbstractScreen {
         toolManager = ToolManager.getInstance();
 
         brushTool = (BrushTool) toolManager.getTool("Brush");
+        eyedropperTool = (EyedropperTool) toolManager.getTool("Eyedropper");
 
         this.setLayout(new BorderLayout());
         this.add(createToolbar(), BorderLayout.NORTH); // Add toolbar at the top
@@ -45,8 +52,37 @@ public class CanvasScreen extends AbstractScreen {
         toolbar.setFloatable(false);
         toolbar.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5)); // Add spacing
 
+
+        // === Tool Buttons ===
+        JToggleButton brushBtn = new JToggleButton("Brush");
+        JToggleButton eyedropperBtn = new JToggleButton("Eyedropper");
+
+        ButtonGroup toolGroup = new ButtonGroup();
+        toolGroup.add(brushBtn);
+        toolGroup.add(eyedropperBtn);
+
+        brushBtn.setSelected(true);
+        brushBtn.addActionListener(e -> toolManager.setActiveTool("Brush"));
+        eyedropperBtn.addActionListener(e -> {
+            toolManager.setActiveTool("Eyedropper");
+            eyedropperTool.setColorUpdateCallback((isPrimary, color) -> {
+                if (isPrimary) {
+                    primaryColorBtn.setBackground(color);
+                    colorManager.setPrimary(color);
+                } else {
+                    secondaryColorBtn.setBackground(color);
+                    colorManager.setSecondary(color);
+                }
+            });
+        });
+
+
+        toolbar.add(brushBtn);
+        toolbar.add(eyedropperBtn);
+        toolbar.addSeparator(new Dimension(20, 0));
+
         // === Color Buttons ===
-        JButton primaryColorBtn = new JButton();
+        primaryColorBtn = new JButton();
         primaryColorBtn.setPreferredSize(new Dimension(30, 30));
         primaryColorBtn.setBackground(colorManager.getPrimary());
         primaryColorBtn.setOpaque(true);
@@ -59,7 +95,7 @@ public class CanvasScreen extends AbstractScreen {
             }
         });
 
-        JButton secondaryColorBtn = new JButton();
+        secondaryColorBtn = new JButton();
         secondaryColorBtn.setPreferredSize(new Dimension(30, 30));
         secondaryColorBtn.setBackground(colorManager.getSecondary());
         secondaryColorBtn.setOpaque(true);
