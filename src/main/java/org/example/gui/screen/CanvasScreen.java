@@ -27,8 +27,8 @@ public class CanvasScreen extends AbstractScreen {
     private JButton primaryColorBtn;
     private JButton secondaryColorBtn;
 
-    public CanvasScreen() {
-        this.canvas = new Canvas();
+    public CanvasScreen(int width, int height, Color backgroundColor) {
+        this.canvas = new Canvas(width, height, backgroundColor);
         this.viewer = new CanvasViewer(this.canvas);
         ApplicationStatusBar statusBar = new ApplicationStatusBar(this.viewer);
 
@@ -42,6 +42,7 @@ public class CanvasScreen extends AbstractScreen {
         this.add(createToolbar(), BorderLayout.NORTH); // Add toolbar at the top
         this.add(viewer, BorderLayout.CENTER);         // Canvas viewer in center
         this.add(statusBar, BorderLayout.SOUTH);
+        // this.add(createSidebar(), BorderLayout.EAST);  // Add sidebar at the right
 
         setupKeyBindings(); // Setup key bindings
     }
@@ -49,6 +50,16 @@ public class CanvasScreen extends AbstractScreen {
     public Canvas getCanvas() {
         return canvas;
     }
+
+    private JPanel createSidebar() {
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setPreferredSize(new Dimension(200, 0));
+        sidebar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        return sidebar;
+    }
+
 
     private JToolBar createToolbar() {
         JToolBar toolbar = new JToolBar();
