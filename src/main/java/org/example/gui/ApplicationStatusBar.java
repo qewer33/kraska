@@ -5,6 +5,7 @@ import org.example.gui.canvas.CanvasViewer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 public class ApplicationStatusBar extends JPanel {
     private CanvasViewer canvasViewer;
@@ -14,15 +15,21 @@ public class ApplicationStatusBar extends JPanel {
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-        JLabel zoom = new JLabel("Zoom: %100");
+        JLabel zoom = new JLabel();
 
         JSlider zoomSlider = new JSlider(10, 500, 100);
         zoomSlider.setMaximumSize(new Dimension(125, 20));
 
+        // Get icons from resource
+        ImageIcon zoomInIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/zoom_in.png")));
+        ImageIcon zoomOutIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/zoom_out.png")));
+        ImageIcon cursor = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/cursor.png")));
+        JLabel cursorLabel = new JLabel(cursor);
+
         // Update canvas zoom factor based on zoom slider
         zoomSlider.addChangeListener(e -> {
             canvasViewer.setZoomFactor(zoomSlider.getValue()/100.0);
-            zoom.setText("Zoom: %" + zoomSlider.getValue());
+            zoom.setText("%" + zoomSlider.getValue() + " ");
         });
 
         // Update slider when canvas zoom changes
@@ -33,19 +40,21 @@ public class ApplicationStatusBar extends JPanel {
         });
 
 
-        JButton decreaseButton = new JButton("-");
+        JButton decreaseButton = new JButton(zoomOutIcon);
         decreaseButton.setContentAreaFilled(false); // Remove button background
+        decreaseButton.setPreferredSize(new Dimension(zoomOutIcon.getIconWidth(), zoomOutIcon.getIconHeight())); // Set button size as icon size
 
         // Decrease zoom factor with decrease button
         decreaseButton.addActionListener(e -> {
             int currentValue = zoomSlider.getValue();
-            if (currentValue > zoomSlider.getMinimum()) { // Minimum kontrolü
-                zoomSlider.setValue(currentValue - 10); // Değeri azalt
+            if (currentValue > zoomSlider.getMinimum()) {
+                zoomSlider.setValue(currentValue - 10);
             }
         });
 
-        JButton increaseButton = new JButton("+");
+        JButton increaseButton = new JButton(zoomInIcon);
         increaseButton.setContentAreaFilled(false); // Remove button background
+        increaseButton.setPreferredSize(new Dimension(zoomInIcon.getIconWidth(), zoomInIcon.getIconHeight())); // Set button size as icon size
 
         // Increase zoom factor with increase button
         increaseButton.addActionListener(e -> {
@@ -77,6 +86,7 @@ public class ApplicationStatusBar extends JPanel {
             }
         });
 
+        add(cursorLabel);
         add(mousePos);
         add(Box.createHorizontalGlue());
         add(zoom);
