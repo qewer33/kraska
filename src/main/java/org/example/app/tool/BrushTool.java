@@ -5,21 +5,26 @@ import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
 
 import org.example.gui.canvas.Canvas;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-public class BrushTool extends AbstractTool implements CanvasPainter {
+public class BrushTool extends AbstractTool implements CanvasPainter, ToolOptionsProvider {
     private final ColorManager colorManager;
     private Color color;
-    private int size;
     private Point lastPoint;
+
+    private int size;
+    private boolean antialiased;
 
     public BrushTool(Color defaultColor, int defaultSize) {
         super("Brush");
         colorManager = ColorManager.getInstance();
         this.color = colorManager.getPrimary();
         this.size = defaultSize;
+        this.antialiased = true;
     }
 
     @Override
@@ -48,13 +53,38 @@ public class BrushTool extends AbstractTool implements CanvasPainter {
         }
     }
 
+    public JPanel getToolOptionsPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JLabel sizeLabel = new JLabel("Size: " + size + "px");
+        JSlider sizeSlider = new JSlider(1, 100, size);
+        sizeSlider.addChangeListener(e -> {
+            size = sizeSlider.getValue();
+            sizeLabel.setText("Size: " + size + "px");
+        });
+
+        panel.add(sizeLabel);
+        panel.add(sizeSlider);
+
+        JCheckBox antialiasCheckbox = new JCheckBox("Antialiasing");
+        antialiasCheckbox.setSelected(antialiased);
+        antialiasCheckbox.addItemListener(e -> {
+            antialiased = antialiasCheckbox.isSelected();
+        });
+
+        panel.add(antialiasCheckbox);
+
+        return panel;
+    }
+
     private void draw(Canvas canvas, Point from, Point to) {
         BufferedImage canvasImage = canvas.getCanvasImage();
         Graphics2D g2d = canvasImage.createGraphics();
 
         // Configure graphics
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+                this.antialiased ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
         g2d.setColor(color);
         g2d.setStroke(new BasicStroke(size, BasicStroke.CAP_ROUND,
                 BasicStroke.JOIN_ROUND));
@@ -76,5 +106,13 @@ public class BrushTool extends AbstractTool implements CanvasPainter {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public boolean isAntialiased() {
+        return antialiased;
+    }
+
+    public void setAntialiased(boolean antialiased) {
+        this.antialiased = antialiased;
     }
 }

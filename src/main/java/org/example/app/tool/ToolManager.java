@@ -1,16 +1,16 @@
 package org.example.app.tool;
 
-import org.example.app.color.ColorManager;
-
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ToolManager {
     private final Map<String, AbstractTool> tools = new HashMap<>();
     private AbstractTool activeTool;
 
-    // Singleton design pattern for manager classes
+    // Listener support
+    private final ArrayList<ToolChangeListener> listeners = new ArrayList<>();
+
+    // Singleton pattern
     private static ToolManager instance;
 
     public static ToolManager getInstance() {
@@ -20,33 +20,55 @@ public class ToolManager {
         return instance;
     }
 
-    private ToolManager(String toolName) {
+    private ToolManager(String defaultTool) {
         registerDefaultTools();
-        setActiveTool(toolName);
+        setActiveTool(defaultTool);
     }
 
     private void registerDefaultTools() {
         registerTool(new BrushTool(Color.BLACK, 5));
         registerTool(new EraserTool(5));
-        registerTool(new EyedropperTool());
+        registerTool(new ColorPickerTool());
     }
 
     public void registerTool(AbstractTool tool) {
         tools.put(tool.getName(), tool);
     }
 
-    public AbstractTool getTool(String toolName) {
-        return tools.get(toolName);
+    public AbstractTool getTool(String name) {
+        return tools.get(name);
     }
 
     public void setActiveTool(String toolName) {
-        AbstractTool tool = tools.get(toolName);
-        if (tool != null) {
-            activeTool = tool;
+        AbstractTool newTool = tools.get(toolName);
+        if (newTool != null && newTool != activeTool) {
+            AbstractTool oldTool = activeTool;
+            activeTool = newTool;
+            notifyToolChanged(oldTool, newTool);
         }
     }
 
     public AbstractTool getActiveTool() {
         return activeTool;
+    }
+
+    // 🔧 Listener registration
+    public void addToolChangeListener(ToolChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeToolChangeListener(ToolChangeListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void notifyToolChanged(AbstractTool oldTool, AbstractTool newTool) {
+        for (ToolChangeListener listener : listeners) {
+            listener.onToolChanged(oldTool, newTool);
+        }
+    }
+
+    // 🔧 Listener interface
+    public interface ToolChangeListener {
+        void onToolChanged(AbstractTool oldTool, AbstractTool newTool);
     }
 }
