@@ -69,29 +69,30 @@ public class CanvasScreen extends AbstractScreen {
 
         // === Tool Buttons ===
         JToggleButton brushBtn = new JToggleButton("Brush");
+        JToggleButton eraserBtn = new JToggleButton("Eraser");
         JToggleButton eyedropperBtn = new JToggleButton("Eyedropper");
 
         ButtonGroup toolGroup = new ButtonGroup();
         toolGroup.add(brushBtn);
+        toolGroup.add(eraserBtn);
         toolGroup.add(eyedropperBtn);
 
         brushBtn.setSelected(true);
         brushBtn.addActionListener(e -> toolManager.setActiveTool("Brush"));
+        eraserBtn.addActionListener(e -> toolManager.setActiveTool("Eraser"));
         eyedropperBtn.addActionListener(e -> {
             toolManager.setActiveTool("Eyedropper");
             eyedropperTool.setColorUpdateCallback((isPrimary, color) -> {
                 if (isPrimary) {
                     primaryColorBtn.setBackground(color);
-                    colorManager.setPrimary(color);
                 } else {
                     secondaryColorBtn.setBackground(color);
-                    colorManager.setSecondary(color);
                 }
             });
         });
 
-
         toolbar.add(brushBtn);
+        toolbar.add(eraserBtn);
         toolbar.add(eyedropperBtn);
         toolbar.addSeparator(new Dimension(20, 0));
 
@@ -123,7 +124,6 @@ public class CanvasScreen extends AbstractScreen {
         });
 
         JButton swapBtn = new JButton("↔");
-        swapBtn.setMargin(new Insets(3, 8, 3, 8));
         swapBtn.addActionListener(e -> {
             colorManager.swap();
             Color temp = primaryColorBtn.getBackground();

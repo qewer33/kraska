@@ -32,11 +32,7 @@ public class Canvas extends JPanel {
         setBackground(backgroundColor); // Set the background color
         initializeCanvas(backgroundColor);
         setupMouseListeners();
-    }
-
-    private void initializeCanvas() {
-        canvas = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
-        clearCanvas();
+        setOpaque(false);
     }
 
     private void initializeCanvas(Color backgroundColor) {
@@ -61,6 +57,17 @@ public class Canvas extends JPanel {
         }
 
         g2d.dispose();
+    }
+
+    @Override
+    public void repaint() {
+        super.repaint();
+
+        // Force parent (CheckerboardPanel) to repaint as well
+        Container parent = getParent();
+        if (parent != null) {
+            parent.repaint(); // <- ensures the checkerboard is refreshed
+        }
     }
 
     // --- DRAWING OPERATIONS ---

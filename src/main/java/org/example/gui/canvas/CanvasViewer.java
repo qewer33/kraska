@@ -3,11 +3,12 @@ package org.example.gui.canvas;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 public class CanvasViewer extends JScrollPane {
     private final Canvas canvas;
     private double zoomFactor = 1.0;
-
     private Point panStartPoint;
     private Point viewStartPoint;
 
@@ -16,12 +17,11 @@ public class CanvasViewer extends JScrollPane {
         this.canvas = canvas;
 
         // Create wrapper panel to center the canvas and add border
-        JPanel canvasWrapper = new JPanel(new GridBagLayout());
-        canvasWrapper.setBackground(Color.DARK_GRAY);
-        canvasWrapper.add(canvas);
-
-        setViewportView(canvasWrapper);
-        setWheelScrollingEnabled(false); // We'll handle scroll/zoom ourselves
+        CheckerboardPanel backgroundPanel = new CheckerboardPanel();
+        this.canvas.setBorder(BorderFactory.createLineBorder(Color.GRAY, 3));
+        backgroundPanel.add(canvas);
+        setViewportView(backgroundPanel);
+        setWheelScrollingEnabled(false); // Disable wheel scroll since it's used for zoom
         setupViewer();
     }
 
@@ -96,10 +96,12 @@ public class CanvasViewer extends JScrollPane {
     }
 
     public void setZoomFactor(double zoomFactor) {
+        double oldValue = this.zoomFactor;
         this.zoomFactor = zoomFactor;
         canvas.setZoomFactor(zoomFactor);
         canvas.revalidate();
         canvas.repaint();
+        this.firePropertyChange("zoomFactor", oldValue, zoomFactor);
     }
 
     public double getZoomFactor() {
@@ -108,5 +110,32 @@ public class CanvasViewer extends JScrollPane {
 
     public Canvas getCanvas() {
         return canvas;
+    }
+
+    private static class CheckerboardPanel extends JPanel {
+        private static final int TILE_SIZE = 16;
+        private static final Color COLOR1 = new Color(200, 200, 200);
+        private static final Color COLOR2 = new Color(240, 240, 240);
+
+        public CheckerboardPanel() {
+            super(new GridBagLayout());
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            // Full clean background
+            super.paintComponent(g);
+
+            Graphics2D g2d = (Graphics2D) g.create();
+
+            // Checkerboard fill
+            for (int y = 0; y < getHeight(); y += TILE_SIZE) {
+                for (int x = 0; x < getWidth(); x += TILE_SIZE) {
+                    g2d.setColor(((x / TILE_SIZE + y / TILE_SIZE) % 2 == 0) ? COLOR1 : COLOR2);
+                    g2d.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                }
+            }
+            g2d.dispose();
+        }
     }
 }

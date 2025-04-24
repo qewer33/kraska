@@ -27,6 +27,7 @@ public class ToolManager {
 
     private void registerDefaultTools() {
         registerTool(new BrushTool(Color.BLACK, 5));
+        registerTool(new EraserTool(5));
         registerTool(new EyedropperTool());
     }
 

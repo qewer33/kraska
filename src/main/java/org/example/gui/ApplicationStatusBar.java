@@ -25,6 +25,14 @@ public class ApplicationStatusBar extends JPanel {
             zoom.setText("Zoom: %" + zoomSlider.getValue());
         });
 
+        // Update slider when canvas zoom changes
+        canvasViewer.addPropertyChangeListener("zoomFactor", evt -> {
+            int zoomPercentage = (int) (canvasViewer.getZoomFactor() * 100);
+            zoomSlider.setValue(zoomPercentage);
+            zoom.setText("Zoom: %" + zoomSlider.getValue());
+        });
+
+
         JButton decreaseButton = new JButton("-");
         decreaseButton.setContentAreaFilled(false); // Remove button background
 
