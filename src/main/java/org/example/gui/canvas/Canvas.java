@@ -12,6 +12,7 @@ import java.util.Stack;
 public class Canvas extends JPanel {
     private Dimension logicalSize = new Dimension(800, 600);
     private BufferedImage canvas;
+    private BufferedImage tempCanvas;
     private double zoomFactor = 1.0;
 
     // Managers
@@ -41,6 +42,8 @@ public class Canvas extends JPanel {
         g2d.setColor(backgroundColor); // Fill the canvas with the background color
         g2d.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         g2d.dispose();
+        
+        tempCanvas = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
     }
 
     @Override
@@ -52,8 +55,9 @@ public class Canvas extends JPanel {
         g2d.scale(zoomFactor, zoomFactor);
 
         // Draw canvas image
-        if (canvas != null) {
+        if (canvas != null && tempCanvas != null) {
             g2d.drawImage(canvas, 0, 0, null);
+            g2d.drawImage(tempCanvas, 0, 0, null);
         }
 
         g2d.dispose();

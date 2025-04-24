@@ -1,7 +1,6 @@
 package org.example.app.tool;
 
 import org.example.gui.canvas.Canvas;
-import org.example.gui.canvas.CanvasModifier;
 import org.example.app.color.ColorManager;
 import org.example.gui.canvas.CanvasPainter;
 
@@ -9,7 +8,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-public class EyedropperTool extends AbstractTool implements CanvasPainter {
+public class ColorPickerTool extends AbstractTool implements CanvasPainter {
     private final ColorManager colorManager;
     private ColorUpdateCallback colorUpdateCallback;
 
@@ -18,8 +17,8 @@ public class EyedropperTool extends AbstractTool implements CanvasPainter {
         void onColorUpdate(boolean isPrimary, Color color);
     }
 
-    public EyedropperTool() {
-        super("Eyedropper");
+    public ColorPickerTool() {
+        super("Color Picker");
         this.colorManager = ColorManager.getInstance();
     }
 
