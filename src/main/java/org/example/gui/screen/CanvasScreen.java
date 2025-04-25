@@ -8,6 +8,7 @@ import org.example.gui.ApplicationStatusBar;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasViewer;
 import org.example.gui.screen.component.CanvasSidebar;
+import org.example.gui.screen.component.CanvasToolbar;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,6 +33,7 @@ public class CanvasScreen extends AbstractScreen {
         this.canvas = new Canvas(width, height, backgroundColor);
         this.viewer = new CanvasViewer(this.canvas);
         ApplicationStatusBar statusBar = new ApplicationStatusBar(this.viewer);
+        CanvasToolbar toolbar = new CanvasToolbar();
 
         colorManager = ColorManager.getInstance();
         toolManager = ToolManager.getInstance();
@@ -40,7 +42,7 @@ public class CanvasScreen extends AbstractScreen {
         colorPickerTool = (ColorPickerTool) toolManager.getTool("Color Picker");
 
         this.setLayout(new BorderLayout());
-        this.add(createToolbar(), BorderLayout.NORTH); // Add toolbar at the top
+        this.add(toolbar, BorderLayout.WEST); // Add toolbar at the top
         this.add(viewer, BorderLayout.CENTER);         // Canvas viewer in center
         this.add(statusBar, BorderLayout.SOUTH);
 
@@ -56,34 +58,6 @@ public class CanvasScreen extends AbstractScreen {
 
     public Canvas getCanvas() {
         return canvas;
-    }
-
-    private JToolBar createToolbar() {
-        JToolBar toolbar = new JToolBar();
-        toolbar.setFloatable(false);
-        toolbar.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5)); // Add spacing
-
-        // === Tool Buttons ===
-        JToggleButton brushBtn = new JToggleButton("Brush");
-        JToggleButton eraserBtn = new JToggleButton("Eraser");
-        JToggleButton eyedropperBtn = new JToggleButton("Color Picker");
-
-        ButtonGroup toolGroup = new ButtonGroup();
-        toolGroup.add(brushBtn);
-        toolGroup.add(eraserBtn);
-        toolGroup.add(eyedropperBtn);
-
-        brushBtn.setSelected(true);
-        brushBtn.addActionListener(e -> toolManager.setActiveTool("Brush"));
-        eraserBtn.addActionListener(e -> toolManager.setActiveTool("Eraser"));
-        eyedropperBtn.addActionListener(e -> toolManager.setActiveTool("Color Picker"));
-
-        toolbar.add(brushBtn);
-        toolbar.add(eraserBtn);
-        toolbar.add(eyedropperBtn);
-        toolbar.addSeparator(new Dimension(20, 0));
-
-        return toolbar;
     }
 
     private void setupKeyBindings() {
