@@ -38,7 +38,7 @@ public class BucketTool extends AbstractTool implements CanvasPainter, ToolOptio
             int py = point.y;
 
             // Check if point is on the canvas and not the same color with already colored points
-            if (px < 0 || py < 0 || px >= canvas.getWidth() || py >= canvas.getHeight() || !(getColorAt(canvas , point).equals(oldColor))) {
+            if (px < 0 || py < 0 || px >= canvas.getWidth()/canvas.getZoomFactor() || py >= canvas.getHeight()/canvas.getZoomFactor() || !(getColorAt(canvas , point).equals(oldColor))) {
                 continue;
             }
 
@@ -46,6 +46,7 @@ public class BucketTool extends AbstractTool implements CanvasPainter, ToolOptio
             g2d.setColor(newColor);
             g2d.fillRect(px, py, 1, 1);
 
+            // Add surrounding pixels to the queue
             queue.add(new Point(px + 1, py));
             queue.add(new Point(px - 1, py));
             queue.add(new Point(px, py + 1));
