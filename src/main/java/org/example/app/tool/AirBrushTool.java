@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public class AirBrushTool extends AbstractTool implements CanvasPainter, ToolOptionsProvider{
-    private ColorManager colorManager;
+    final private ColorManager colorManager;
     private Color color;
     private Point lastPoint;
     private int radius;
@@ -31,11 +31,11 @@ public class AirBrushTool extends AbstractTool implements CanvasPainter, ToolOpt
         Random random = new Random();
 
         // Loop for creating 100 particles
-        for (int i = 0; i < density; i++) { // 100 partikül
+        for (int i = 0; i < density; i++) {
 
             // Select a random position
-            double angle = random.nextDouble() * 2 * Math.PI; // 0 ile 2π arası açı
-            double distance = random.nextDouble() * radius;  // Radius içinde rastgele mesafe
+            double angle = random.nextDouble() * 2 * Math.PI;
+            double distance = random.nextDouble() * radius;
 
             // Calculate the (dx, dy) coordinates based on angle and distance
             int dx = (int) (centerX + Math.cos(angle) * distance);
@@ -43,7 +43,7 @@ public class AirBrushTool extends AbstractTool implements CanvasPainter, ToolOpt
             Point point = new Point(dx, dy);
 
             //  Check if the point is on the canvas
-            if (dx < 0 || dy < 0 || dx >= canvasImage.getWidth()/canvas.getZoomFactor() || dy >= canvasImage.getHeight()/canvas.getZoomFactor()) {
+            if (dx < 0 || dy < 0 || dx >= canvas.getLogicalSize().getWidth() || dy >= canvas.getLogicalSize().getHeight()) {
                 continue; // Skip points outside the canvas
             }
 
