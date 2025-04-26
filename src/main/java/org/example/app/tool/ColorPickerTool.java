@@ -25,7 +25,7 @@ public class ColorPickerTool extends AbstractTool implements CanvasPainter {
     @Override
     public void onMousePress(Canvas canvas, MouseEvent e) {
         Point point = canvas.getUnzoomedPoint(e.getPoint());
-        Color pickedColor = getColorAt(canvas, point);
+        Color pickedColor = canvas.getColorAt(canvas, point);
 
         if (e.getButton() == MouseEvent.BUTTON1) {
             colorManager.setPrimary(pickedColor);
@@ -45,15 +45,6 @@ public class ColorPickerTool extends AbstractTool implements CanvasPainter {
 
     @Override
     public void onMouseRelease(Canvas canvas, MouseEvent e) {}
-
-    private Color getColorAt(Canvas canvas, Point point) {
-        BufferedImage image = canvas.getCanvasImage();
-        if (point.x >= 0 && point.x < image.getWidth()
-                && point.y >= 0 && point.y < image.getHeight()) {
-            return new Color(image.getRGB(point.x, point.y), true);
-        }
-        return Color.WHITE;
-    }
 
     public void setColorUpdateCallback(ColorUpdateCallback callback) {
         this.colorUpdateCallback = callback;

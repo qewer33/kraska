@@ -203,6 +203,15 @@ public class Canvas extends JPanel {
         return new Point(x, y);
     }
 
+    public Color getColorAt(Canvas canvas, Point point) {
+        BufferedImage image = canvas.getCanvasImage();
+        if (point.x >= 0 && point.x < image.getWidth()
+                && point.y >= 0 && point.y < image.getHeight()) {
+            return new Color(image.getRGB(point.x, point.y), true);
+        }
+        return Color.WHITE;
+    }
+
     // --- GETTERS AND SETTERS ---
 
     public BufferedImage getCanvasImage() {

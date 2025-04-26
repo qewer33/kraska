@@ -21,18 +21,22 @@ public class CanvasToolbar extends JToolBar {
         ImageIcon eraserIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/eraser.png")));
         ImageIcon eyedropperIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/eyedropper.png")));
         ImageIcon bucketIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/bucket.png")));
+        ImageIcon airBrushIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/airBrush.png")));
 
         // === Tool Buttons ===
         JToggleButton brushBtn = new JToggleButton(brushIcon);
         JToggleButton eraserBtn = new JToggleButton(eraserIcon);
         JToggleButton eyedropperBtn = new JToggleButton(eyedropperIcon);
+        eyedropperBtn.setMargin(new Insets(0, 4, 0, 0));
         JToggleButton bucketButton = new JToggleButton(bucketIcon);
+        JToggleButton airBrushButton = new JToggleButton(airBrushIcon);
 
         ButtonGroup toolGroup = new ButtonGroup();
         toolGroup.add(brushBtn);
         toolGroup.add(eraserBtn);
         toolGroup.add(eyedropperBtn);
         toolGroup.add(bucketButton);
+        toolGroup.add(airBrushButton);
 
         // Change active tool
         brushBtn.setSelected(true);
@@ -40,15 +44,18 @@ public class CanvasToolbar extends JToolBar {
         eraserBtn.addActionListener(e -> toolManager.setActiveTool("Eraser"));
         eyedropperBtn.addActionListener(e -> toolManager.setActiveTool("Color Picker"));
         bucketButton.addActionListener(e -> toolManager.setActiveTool("Bucket"));
+        airBrushButton.addActionListener(e -> toolManager.setActiveTool("Air Brush"));
 
         // Add buttons
         add(brushBtn);
         addSeparator(new Dimension(0, 10));
         add(eraserBtn);
         addSeparator(new Dimension(0, 10));
-        add(eyedropperBtn);
-        addSeparator(new Dimension(0, 10));
         add(bucketButton);
+        addSeparator(new Dimension(0, 10));
+        add(airBrushButton);
+        addSeparator(new Dimension(0, 10));
+        add(eyedropperBtn);
 
     }
 }

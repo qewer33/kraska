@@ -30,6 +30,7 @@ public class ToolManager {
         registerTool(new EraserTool(5));
         registerTool(new ColorPickerTool());
         registerTool(new BucketTool());
+        registerTool(new AirBrushTool(10,50));
     }
 
     public void registerTool(AbstractTool tool) {

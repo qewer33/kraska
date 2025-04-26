@@ -26,7 +26,7 @@ public class BucketTool extends AbstractTool implements CanvasPainter, ToolOptio
         BufferedImage canvasImage = canvas.getCanvasImage();
         Graphics2D g2d = canvasImage.createGraphics();
 
-        Color oldColor = getColorAt(canvas,mousePoint);
+        Color oldColor = canvas.getColorAt(canvas,mousePoint);
         if (oldColor.equals(newColor)) return;
 
         Queue<Point> queue = new LinkedList<>();
@@ -38,7 +38,7 @@ public class BucketTool extends AbstractTool implements CanvasPainter, ToolOptio
             int py = point.y;
 
             // Check if point is on the canvas and not the same color with already colored points
-            if (px < 0 || py < 0 || px >= canvas.getWidth()/canvas.getZoomFactor() || py >= canvas.getHeight()/canvas.getZoomFactor() || !(getColorAt(canvas , point).equals(oldColor))) {
+            if (px < 0 || py < 0 || px >= canvas.getWidth()/canvas.getZoomFactor() || py >= canvas.getHeight()/canvas.getZoomFactor() || !(canvas.getColorAt(canvas , point).equals(oldColor))) {
                 continue;
             }
 
@@ -55,16 +55,6 @@ public class BucketTool extends AbstractTool implements CanvasPainter, ToolOptio
 
         g2d.dispose();
         canvas.repaint();
-    }
-
-    // Get the color of the specified pixel
-    private Color getColorAt(Canvas canvas, Point point) {
-        BufferedImage image = canvas.getCanvasImage();
-        if (point.x >= 0 && point.x < image.getWidth()
-                && point.y >= 0 && point.y < image.getHeight()) {
-            return new Color(image.getRGB(point.x, point.y), true);
-        }
-        return null;
     }
 
     @Override
