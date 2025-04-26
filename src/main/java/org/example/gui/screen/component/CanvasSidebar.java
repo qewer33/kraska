@@ -3,6 +3,7 @@ package org.example.gui.screen.component;
 import org.example.app.color.ColorManager;
 import org.example.app.tool.AbstractTool;
 import org.example.app.tool.ToolOptionsProvider;
+import org.example.gui.screen.component.ColorPalette;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +15,7 @@ public class CanvasSidebar extends JPanel {
 
     public CanvasSidebar() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setPreferredSize(new Dimension(200, 0));
+        setPreferredSize(new Dimension(250, 0));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // === Color Section ===
@@ -90,6 +91,17 @@ public class CanvasSidebar extends JPanel {
         colorButtonsPanel.add(primaryColorBtn);
         colorButtonsPanel.add(swapBtn);
         colorButtonsPanel.add(secondaryColorBtn);
+
+        colorButtonsPanel.add(Box.createVerticalStrut(10));
+
+        JPanel paletteWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        paletteWrapper.setOpaque(false);
+
+        paletteWrapper.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+        paletteWrapper.add(new ColorPalette());   // new sexy palette oye
+
+        colorButtonsPanel.add(paletteWrapper);
 
         return colorButtonsPanel;
     }
