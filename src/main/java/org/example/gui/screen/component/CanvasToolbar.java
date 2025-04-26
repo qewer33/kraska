@@ -47,6 +47,7 @@ public class CanvasToolbar extends JToolBar {
         airBrushButton.addActionListener(e -> toolManager.setActiveTool("Air Brush"));
 
         // Add buttons
+        addSeparator(new Dimension(0, 10));
         add(brushBtn);
         addSeparator(new Dimension(0, 10));
         add(eraserBtn);
@@ -56,6 +57,5 @@ public class CanvasToolbar extends JToolBar {
         add(airBrushButton);
         addSeparator(new Dimension(0, 10));
         add(eyedropperBtn);
-
     }
 }

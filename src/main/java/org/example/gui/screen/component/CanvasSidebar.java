@@ -7,6 +7,7 @@ import org.example.gui.screen.component.ColorPalette;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class CanvasSidebar extends JPanel {
     private final JPanel toolOptionsContainer;
@@ -81,7 +82,9 @@ public class CanvasSidebar extends JPanel {
             secondaryColorBtn.setBackground(secondary);
         });
 
-        JButton swapBtn = new JButton("↔");
+        ImageIcon swapIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/swap.png")));
+
+        JButton swapBtn = new JButton(swapIcon);
         swapBtn.setPreferredSize(new Dimension(40, 20));
         swapBtn.addActionListener(e -> {
             colorManager.swap();
