@@ -22,6 +22,7 @@ public class CanvasToolbar extends JToolBar {
         ImageIcon eyedropperIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/eyedropper.png")));
         ImageIcon bucketIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/bucket.png")));
         ImageIcon airBrushIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/airBrush.png")));
+        ImageIcon shapeIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape.png")));
 
         // === Tool Buttons ===
         JToggleButton brushBtn = new JToggleButton(brushIcon);
@@ -30,6 +31,7 @@ public class CanvasToolbar extends JToolBar {
         eyedropperBtn.setMargin(new Insets(0, 4, 0, 0));
         JToggleButton bucketButton = new JToggleButton(bucketIcon);
         JToggleButton airBrushButton = new JToggleButton(airBrushIcon);
+        JToggleButton shapeButton = new JToggleButton(shapeIcon);
 
         ButtonGroup toolGroup = new ButtonGroup();
         toolGroup.add(brushBtn);
@@ -37,6 +39,7 @@ public class CanvasToolbar extends JToolBar {
         toolGroup.add(eyedropperBtn);
         toolGroup.add(bucketButton);
         toolGroup.add(airBrushButton);
+        toolGroup.add(shapeButton);
 
         // Change active tool
         brushBtn.setSelected(true);
@@ -45,6 +48,7 @@ public class CanvasToolbar extends JToolBar {
         eyedropperBtn.addActionListener(e -> toolManager.setActiveTool("Color Picker"));
         bucketButton.addActionListener(e -> toolManager.setActiveTool("Bucket"));
         airBrushButton.addActionListener(e -> toolManager.setActiveTool("Air Brush"));
+        shapeButton.addActionListener(e -> toolManager.setActiveTool("Shape"));
 
         // Add buttons
         add(brushBtn);
@@ -56,6 +60,7 @@ public class CanvasToolbar extends JToolBar {
         add(airBrushButton);
         addSeparator(new Dimension(0, 10));
         add(eyedropperBtn);
-
+        addSeparator(new Dimension(0, 10));
+        add(shapeButton);
     }
 }

@@ -1,6 +1,7 @@
 package org.example;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.util.SystemInfo;
 import org.example.gui.ApplicationMenu;
 import org.example.gui.screen.DashboardScreen;
 
@@ -23,6 +24,11 @@ public class Application {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
+        }
+
+        if (SystemInfo.isLinux) {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
         }
     }
 

@@ -1,6 +1,5 @@
 package org.example.app.tool;
 
-import org.example.app.color.ColorManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
 
@@ -10,20 +9,20 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 public class EraserTool extends AbstractTool implements CanvasPainter, ToolOptionsProvider {
-    private Color color;
     private Point lastPoint;
-
     private int size;
     private boolean antialiased;
+    private float force; // New: 0.0 (weak) to 1.0 (full erase)
 
     public EraserTool(int defaultSize) {
         super("Eraser");
         this.size = defaultSize;
         this.antialiased = true;
+        this.force = 1.0f; // Default to full strength erase
     }
 
     @Override
-    public void onMousePress(org.example.gui.canvas.Canvas canvas, MouseEvent e) {
+    public void onMousePress(Canvas canvas, MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1 || e.getButton() == MouseEvent.BUTTON3) {
             lastPoint = canvas.getUnzoomedPoint(e.getPoint());
             erase(canvas, lastPoint, lastPoint);
@@ -31,7 +30,7 @@ public class EraserTool extends AbstractTool implements CanvasPainter, ToolOptio
     }
 
     @Override
-    public void onMouseDrag(org.example.gui.canvas.Canvas canvas, MouseEvent e) {
+    public void onMouseDrag(Canvas canvas, MouseEvent e) {
         if (lastPoint != null) {
             Point current = canvas.getUnzoomedPoint(e.getPoint());
             erase(canvas, lastPoint, current);
@@ -40,32 +39,45 @@ public class EraserTool extends AbstractTool implements CanvasPainter, ToolOptio
     }
 
     @Override
-    public void onMouseRelease(org.example.gui.canvas.Canvas canvas, MouseEvent e) {
+    public void onMouseRelease(Canvas canvas, MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1 || e.getButton() == MouseEvent.BUTTON3) {
             lastPoint = null;
         }
     }
 
+    @Override
     public JPanel getToolOptionsPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        JLabel label = new JLabel("Size: " + size + "px");
+        // Size slider
+        JLabel sizeLabel = new JLabel("Size: " + size + "px");
         JSlider sizeSlider = new JSlider(1, 100, size);
         sizeSlider.addChangeListener(e -> {
             size = sizeSlider.getValue();
-            label.setText("Size: " + size + "px");
+            sizeLabel.setText("Size: " + size + "px");
         });
 
-        panel.add(label);
+        panel.add(sizeLabel);
         panel.add(sizeSlider);
 
+        // Force slider (transparency strength)
+        JLabel forceLabel = new JLabel("Force: " + (int)(force * 100) + "%");
+        JSlider forceSlider = new JSlider(1, 100, (int)(force * 100));
+        forceSlider.addChangeListener(e -> {
+            force = forceSlider.getValue() / 100f;
+            forceLabel.setText("Force: " + forceSlider.getValue() + "%");
+        });
+
+        panel.add(forceLabel);
+        panel.add(forceSlider);
+
+        // Antialias checkbox
         JCheckBox antialiasCheckbox = new JCheckBox("Antialiasing");
         antialiasCheckbox.setSelected(antialiased);
         antialiasCheckbox.addItemListener(e -> {
             antialiased = antialiasCheckbox.isSelected();
         });
-
         panel.add(antialiasCheckbox);
 
         return panel;
@@ -73,24 +85,48 @@ public class EraserTool extends AbstractTool implements CanvasPainter, ToolOptio
 
     private void erase(Canvas canvas, Point from, Point to) {
         BufferedImage canvasImage = canvas.getCanvasImage();
+
         Graphics2D g2d = canvasImage.createGraphics();
-
-        // Enable smooth edges
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, this.antialiased ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
-
-        // Set composite mode to CLEAR — this makes pixels fully transparent
-        g2d.setComposite(AlphaComposite.Clear);
-
-        // Erase using a round brush stroke
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                this.antialiased ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
         g2d.setStroke(new BasicStroke(size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2d.dispose(); // we will not draw anything directly!
 
-        if (from.equals(to)) {
-            g2d.fillOval(from.x - size / 2, from.y - size / 2, size, size);
-        } else {
-            g2d.drawLine(from.x, from.y, to.x, to.y);
+        // Calculate the bounding rectangle
+        int minX = Math.min(from.x, to.x) - size / 2;
+        int minY = Math.min(from.y, to.y) - size / 2;
+        int maxX = Math.max(from.x, to.x) + size / 2;
+        int maxY = Math.max(from.y, to.y) + size / 2;
+
+        // Clamp to canvas bounds
+        minX = Math.max(0, minX);
+        minY = Math.max(0, minY);
+        maxX = Math.min(canvasImage.getWidth() - 1, maxX);
+        maxY = Math.min(canvasImage.getHeight() - 1, maxY);
+
+        // Loop over the pixels inside the affected area
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                // Check if pixel is within the eraser circle
+                double dist = from.distance(x, y);
+                if (dist <= size / 2.0) {
+                    int rgba = canvasImage.getRGB(x, y);
+                    int alpha = (rgba >> 24) & 0xFF;
+                    int red = (rgba >> 16) & 0xFF;
+                    int green = (rgba >> 8) & 0xFF;
+                    int blue = rgba & 0xFF;
+
+                    // Calculate new alpha
+                    int newAlpha = (int)(alpha * (1.0f - force));
+                    if (newAlpha < 0) newAlpha = 0;
+
+                    // Write pixel back
+                    int newRGBA = (newAlpha << 24) | (red << 16) | (green << 8) | blue;
+                    canvasImage.setRGB(x, y, newRGBA);
+                }
+            }
         }
 
-        g2d.dispose();
         canvas.repaint();
     }
 

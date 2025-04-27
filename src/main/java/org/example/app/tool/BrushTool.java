@@ -9,7 +9,6 @@ import org.example.gui.canvas.Canvas;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 
 public class BrushTool extends AbstractTool implements CanvasPainter, ToolOptionsProvider {
     private final ColorManager colorManager;
@@ -17,6 +16,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
     private Point lastPoint;
 
     private int size;
+    private float force = 1.0f;
     private boolean antialiased;
 
     public BrushTool(Color defaultColor, int defaultSize) {
@@ -31,6 +31,9 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
     public void onMousePress(Canvas canvas, MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1 || e.getButton() == MouseEvent.BUTTON3) {
             this.color = e.getButton() == MouseEvent.BUTTON1 ? colorManager.getPrimary() : colorManager.getSecondary();
+
+            canvas.setTempBufferAlpha(force);
+            canvas.clearTempBuffer();
 
             lastPoint = canvas.getUnzoomedPoint(e.getPoint());
             draw(canvas, lastPoint, lastPoint);
@@ -49,9 +52,11 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
     @Override
     public void onMouseRelease(Canvas canvas, MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1 || e.getButton() == MouseEvent.BUTTON3) {
+            canvas.applyTempBuffer(force);
             lastPoint = null;
         }
     }
+
 
     public JPanel getToolOptionsPanel() {
         JPanel panel = new JPanel();
@@ -67,6 +72,17 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
         panel.add(sizeLabel);
         panel.add(sizeSlider);
 
+        // Force slider (transparency strength)
+        JLabel forceLabel = new JLabel("Force: " + (int)(force * 100) + "%");
+        JSlider forceSlider = new JSlider(1, 100, (int)(force * 100));
+        forceSlider.addChangeListener(e -> {
+            force = forceSlider.getValue() / 100f;
+            forceLabel.setText("Force: " + forceSlider.getValue() + "%");
+        });
+
+        panel.add(forceLabel);
+        panel.add(forceSlider);
+
         JCheckBox antialiasCheckbox = new JCheckBox("Antialiasing");
         antialiasCheckbox.setSelected(antialiased);
         antialiasCheckbox.addItemListener(e -> {
@@ -79,10 +95,8 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
     }
 
     private void draw(Canvas canvas, Point from, Point to) {
-        BufferedImage canvasImage = canvas.getCanvasImage();
-        Graphics2D g2d = canvasImage.createGraphics();
+        Graphics2D g2d = canvas.getTempGraphics();
 
-        // Configure graphics
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 this.antialiased ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
         g2d.setColor(color);
@@ -106,6 +120,14 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public float getForce() {
+        return force;
+    }
+
+    public void setForce(float force) {
+        this.force = force;
     }
 
     public boolean isAntialiased() {

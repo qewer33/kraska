@@ -31,6 +31,7 @@ public class ToolManager {
         registerTool(new ColorPickerTool());
         registerTool(new BucketTool());
         registerTool(new AirBrushTool(10,50));
+        registerTool(new ShapeTool());
     }
 
     public void registerTool(AbstractTool tool) {
