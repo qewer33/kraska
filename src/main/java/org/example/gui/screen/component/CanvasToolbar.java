@@ -51,6 +51,7 @@ public class CanvasToolbar extends JToolBar {
         shapeButton.addActionListener(e -> toolManager.setActiveTool("Shape"));
 
         // Add buttons
+        addSeparator(new Dimension(0, 10));
         add(brushBtn);
         addSeparator(new Dimension(0, 10));
         add(eraserBtn);

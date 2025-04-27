@@ -7,6 +7,7 @@ import org.example.app.tool.ToolManager;
 import org.example.gui.ApplicationStatusBar;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasViewer;
+import org.example.gui.screen.component.CanvasFileOperationsBar;
 import org.example.gui.screen.component.CanvasSidebar;
 import org.example.gui.screen.component.CanvasToolbar;
 
@@ -34,6 +35,7 @@ public class CanvasScreen extends AbstractScreen {
         this.viewer = new CanvasViewer(this.canvas);
         ApplicationStatusBar statusBar = new ApplicationStatusBar(this.viewer);
         CanvasToolbar toolbar = new CanvasToolbar();
+        CanvasFileOperationsBar fileOperationsBar = new CanvasFileOperationsBar(this.canvas);
 
         colorManager = ColorManager.getInstance();
         toolManager = ToolManager.getInstance();
@@ -43,8 +45,9 @@ public class CanvasScreen extends AbstractScreen {
 
         this.setLayout(new BorderLayout());
         this.add(toolbar, BorderLayout.WEST); // Add toolbar at the top
-        this.add(viewer, BorderLayout.CENTER);         // Canvas viewer in center
+        this.add(viewer, BorderLayout.CENTER); // Canvas viewer in center
         this.add(statusBar, BorderLayout.SOUTH);
+        this.add(fileOperationsBar, BorderLayout.NORTH);
 
         CanvasSidebar sidebar = new CanvasSidebar();
         sidebar.updateToolOptions(toolManager.getActiveTool());
