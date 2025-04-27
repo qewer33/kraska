@@ -51,17 +51,17 @@ public class CanvasToolbar extends JToolBar {
         shapeButton.addActionListener(e -> toolManager.setActiveTool("Shape"));
 
         // Add buttons
-        addSeparator(new Dimension(0, 10));
+        addSeparator(new Dimension(0, 5));
         add(brushBtn);
-        addSeparator(new Dimension(0, 10));
+        addSeparator(new Dimension(0, 5));
         add(eraserBtn);
-        addSeparator(new Dimension(0, 10));
+        addSeparator(new Dimension(0, 5));
         add(bucketButton);
-        addSeparator(new Dimension(0, 10));
+        addSeparator(new Dimension(0, 5));
         add(airBrushButton);
-        addSeparator(new Dimension(0, 10));
+        addSeparator(new Dimension(0, 5));
         add(eyedropperBtn);
-        addSeparator(new Dimension(0, 10));
+        addSeparator(new Dimension(0, 5));
         add(shapeButton);
     }
 }

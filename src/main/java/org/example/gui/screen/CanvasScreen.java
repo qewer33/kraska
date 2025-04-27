@@ -19,17 +19,6 @@ public class CanvasScreen extends AbstractScreen {
     Canvas canvas;
     CanvasViewer viewer;
 
-    // Managers
-    private final ColorManager colorManager;
-    private final ToolManager toolManager;
-
-    private final BrushTool brushTool;
-    private final ColorPickerTool colorPickerTool;
-
-    // Color buttons
-    private JButton primaryColorBtn;
-    private JButton secondaryColorBtn;
-
     public CanvasScreen(int width, int height, Color backgroundColor) {
         this.canvas = new Canvas(width, height, backgroundColor);
         this.viewer = new CanvasViewer(this.canvas);
@@ -37,11 +26,7 @@ public class CanvasScreen extends AbstractScreen {
         CanvasToolbar toolbar = new CanvasToolbar();
         CanvasFileOperationsBar fileOperationsBar = new CanvasFileOperationsBar(this.canvas);
 
-        colorManager = ColorManager.getInstance();
-        toolManager = ToolManager.getInstance();
-
-        brushTool = (BrushTool) toolManager.getTool("Brush");
-        colorPickerTool = (ColorPickerTool) toolManager.getTool("Color Picker");
+        ToolManager toolManager = ToolManager.getInstance();
 
         this.setLayout(new BorderLayout());
         this.add(toolbar, BorderLayout.WEST); // Add toolbar at the top

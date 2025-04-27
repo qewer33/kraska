@@ -45,8 +45,8 @@ public class CanvasFileOperationsBar extends JToolBar {
         addSeparator(new Dimension(5, 0));
         add(saveAsButton);
         addSeparator(new Dimension(5, 0));
-        add(redoButton);
-        addSeparator(new Dimension(5, 0));
         add(undoButton);
+        addSeparator(new Dimension(5, 0));
+        add(redoButton);
     }
 }

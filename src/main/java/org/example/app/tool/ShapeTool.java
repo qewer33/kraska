@@ -38,8 +38,9 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
     public void onMouseDrag(Canvas canvas, MouseEvent e) {
         if (startPoint != null) {
             Point current = canvas.getUnzoomedPoint(e.getPoint());
+            boolean shiftDown = (e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) != 0;
 
-            canvas.clearTempBuffer(); // clear previous preview
+            canvas.clearTempBuffer();
 
             Graphics2D g2d = canvas.getTempGraphics();
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -47,43 +48,70 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             g2d.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
             switch (shapeType) {
-                case LINE -> g2d.drawLine(startPoint.x, startPoint.y, current.x, current.y);
+                case LINE -> {
+                    if (shiftDown) {
+                        int dx = current.x - startPoint.x;
+                        int dy = current.y - startPoint.y;
+                        double angle = Math.atan2(dy, dx);
+                        double snapAngle = Math.PI / 4;
+                        angle = Math.round(angle / snapAngle) * snapAngle;
+                        double length = Math.hypot(dx, dy);
+                        current.x = startPoint.x + (int) (Math.cos(angle) * length);
+                        current.y = startPoint.y + (int) (Math.sin(angle) * length);
+                    }
+                    g2d.drawLine(startPoint.x, startPoint.y, current.x, current.y);
+                }
                 case RECTANGLE -> {
                     int x = Math.min(startPoint.x, current.x);
                     int y = Math.min(startPoint.y, current.y);
                     int w = Math.abs(startPoint.x - current.x);
                     int h = Math.abs(startPoint.y - current.y);
+
+                    if (shiftDown) {
+                        int size = Math.max(w, h);
+                        w = h = size;
+                    }
+
                     if (filled) {
                         g2d.setColor(colorManager.getSecondary());
                         g2d.fillRect(x, y, w, h);
                         g2d.setColor(colorManager.getPrimary());
                         g2d.drawRect(x, y, w, h);
-                    }
-                    else g2d.drawRect(x, y, w, h);
+                    } else g2d.drawRect(x, y, w, h);
                 }
                 case ELLIPSE -> {
                     int x = Math.min(startPoint.x, current.x);
                     int y = Math.min(startPoint.y, current.y);
                     int w = Math.abs(startPoint.x - current.x);
                     int h = Math.abs(startPoint.y - current.y);
+
+                    if (shiftDown) {
+                        int size = Math.max(w, h);
+                        w = h = size;
+                    }
+
                     if (filled) {
                         g2d.setColor(colorManager.getSecondary());
                         g2d.fillOval(x, y, w, h);
                         g2d.setColor(colorManager.getPrimary());
                         g2d.drawOval(x, y, w, h);
-                    }
-                    else g2d.drawOval(x, y, w, h);
+                    } else g2d.drawOval(x, y, w, h);
                 }
                 case TRIANGLE -> {
+                    if (shiftDown) {
+                        int side = Math.max(Math.abs(current.x - startPoint.x), Math.abs(current.y - startPoint.y));
+                        current.x = startPoint.x + side;
+                        current.y = startPoint.y + side;
+                    }
+
                     int x1 = startPoint.x;
                     int y1 = startPoint.y;
                     int x2 = current.x;
                     int y2 = current.y;
-
                     int midX = (x1 + x2) / 2;
 
                     int[] xPoints = { x1, x2, midX };
-                    int[] yPoints = { y2, y2, y1 }; // Bottom-left, bottom-right, top-center
+                    int[] yPoints = { y2, y2, y1 };
 
                     if (filled) {
                         g2d.setColor(colorManager.getSecondary());
@@ -100,6 +128,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             canvas.repaint();
         }
     }
+
 
     @Override
     public void onMouseRelease(Canvas canvas, MouseEvent e) {
