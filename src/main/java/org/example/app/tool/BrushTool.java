@@ -5,6 +5,7 @@ import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
 
 import org.example.gui.canvas.Canvas;
+import org.example.gui.screen.component.ToolOptionsPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -59,8 +60,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
 
 
     public JPanel getToolOptionsPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        ToolOptionsPanel panel = new ToolOptionsPanel();
 
         JLabel sizeLabel = new JLabel("Size: " + size + "px");
         JSlider sizeSlider = new JSlider(1, 100, size);
@@ -68,9 +68,6 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
             size = sizeSlider.getValue();
             sizeLabel.setText("Size: " + size + "px");
         });
-
-        panel.add(sizeLabel);
-        panel.add(sizeSlider);
 
         // Force slider (transparency strength)
         JLabel forceLabel = new JLabel("Force: " + (int)(force * 100) + "%");
@@ -80,16 +77,15 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
             forceLabel.setText("Force: " + forceSlider.getValue() + "%");
         });
 
-        panel.add(forceLabel);
-        panel.add(forceSlider);
-
         JCheckBox antialiasCheckbox = new JCheckBox("Antialiasing");
         antialiasCheckbox.setSelected(antialiased);
         antialiasCheckbox.addItemListener(e -> {
             antialiased = antialiasCheckbox.isSelected();
         });
 
-        panel.add(antialiasCheckbox);
+        panel.addComponentGroup(new JComponent[]{sizeLabel, sizeSlider});
+        panel.addComponentGroup(new JComponent[]{forceLabel, forceSlider});
+        panel.addComponent(antialiasCheckbox);
 
         return panel;
     }

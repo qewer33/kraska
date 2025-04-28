@@ -3,6 +3,7 @@ package org.example.app.tool;
 import org.example.app.color.ColorManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
+import org.example.gui.screen.component.ToolOptionsPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -148,13 +149,10 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
 
     @Override
     public JPanel getToolOptionsPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        ToolOptionsPanel panel = new ToolOptionsPanel();
 
         // Label
         JLabel shapeLabel = new JLabel("Shape:");
-        shapeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(shapeLabel);
 
         // 4x2 Toggle button grid
         JPanel buttonGrid = new JPanel(new GridLayout(2, 4, 5, 5));
@@ -183,24 +181,15 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             }
         }
 
-        buttonGrid.setMaximumSize(new Dimension(200, 120));
-        panel.add(buttonGrid);
-
-        panel.add(Box.createVerticalStrut(10));
-
         // Fill checkbox
         JCheckBox fillBox = new JCheckBox("Filled");
         fillBox.setSelected(filled);
         fillBox.addItemListener(e -> filled = fillBox.isSelected());
         fillBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(fillBox);
-
-        panel.add(Box.createVerticalStrut(10));
 
         // Thickness slider
         JLabel thicknessLabel = new JLabel("Thickness: " + thickness + "px");
         thicknessLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(thicknessLabel);
 
         JSlider thicknessSlider = new JSlider(1, 20, thickness);
         thicknessSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -210,7 +199,15 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             thicknessLabel.setText("Thickness: " + thickness + "px");
         });
 
-        panel.add(thicknessSlider);
+        panel.addComponentGroup(new JComponent[]{
+                shapeLabel,
+                buttonGrid,
+        }, 10);
+        panel.addComponentGroup(new JComponent[]{
+                thicknessLabel,
+                thicknessSlider,
+        });
+        panel.addComponent(fillBox);
 
         return panel;
     }
