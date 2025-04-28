@@ -90,7 +90,7 @@ public class CanvasSidebar extends JPanel {
             colorManager.swap();
         });
 
-        colorButtonsPanel.add(Box.createHorizontalStrut(20));
+        colorButtonsPanel.add(Box.createHorizontalStrut(45));
         colorButtonsPanel.add(primaryColorBtn);
         colorButtonsPanel.add(swapBtn);
         colorButtonsPanel.add(secondaryColorBtn);
@@ -100,7 +100,7 @@ public class CanvasSidebar extends JPanel {
         JPanel paletteWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         paletteWrapper.setOpaque(false);
 
-        paletteWrapper.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        paletteWrapper.setBorder(BorderFactory.createEmptyBorder(25, 25, 0, 0));
 
         paletteWrapper.add(new ColorPalette());   // new sexy palette oye
 
