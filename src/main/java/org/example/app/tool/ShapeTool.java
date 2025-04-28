@@ -167,7 +167,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         ToolOptionsPanel panel = new ToolOptionsPanel();
 
         // Label
-        JLabel shapeLabel = new JLabel("Shape:");
+        JLabel shapeLabel = new JLabel("Shape: " + getShapeName());
 
         // 4x2 Toggle button grid
         JPanel buttonGrid = new JPanel(new GridLayout(3, 4, 5, 5));
@@ -188,7 +188,10 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
 
         for (ShapeType type : ShapeType.values()) {
             JToggleButton btn = new JToggleButton(shapeIcons.get(type));
-            btn.addActionListener(e -> shapeType = type);
+            btn.addActionListener(e -> {
+                shapeType = type;
+                shapeLabel.setText("Shape: " + getShapeName());
+            });
             btn.setFocusable(false);
             shapeGroup.add(btn);
             buttonGrid.add(btn);
@@ -366,6 +369,19 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         }
 
         g2d.drawImage(image, x, y, w, h, null);
+    }
+    
+    private String getShapeName() {
+        String[] words = shapeType.name().toLowerCase().split("_");
+        StringBuilder result = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                result.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1))
+                        .append(" ");
+            }
+        }
+        return result.toString().trim();
     }
 }
 
