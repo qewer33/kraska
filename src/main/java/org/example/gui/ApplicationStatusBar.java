@@ -87,9 +87,11 @@ public class ApplicationStatusBar extends JPanel {
         });
 
         add(cursorLabel);
+        add(Box.createRigidArea(new Dimension(5, 0)));
         add(mousePos);
         add(Box.createHorizontalGlue());
         add(zoom);
+        add(Box.createRigidArea(new Dimension(5, 0)));
         add(decreaseButton);
         add(zoomSlider);
         add(increaseButton);

@@ -80,48 +80,48 @@ public class EraserTool extends AbstractTool implements CanvasPainter, ToolOptio
     private void erase(Canvas canvas, Point from, Point to) {
         BufferedImage canvasImage = canvas.getCanvasImage();
 
-        Graphics2D g2d = canvasImage.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                this.antialiased ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
-        g2d.setStroke(new BasicStroke(size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2d.dispose(); // we will not draw anything directly!
+        int steps = (int) from.distance(to); // how many steps along the line
+        if (steps == 0) steps = 1; // prevent division by zero
 
-        // Calculate the bounding rectangle
-        int minX = Math.min(from.x, to.x) - size / 2;
-        int minY = Math.min(from.y, to.y) - size / 2;
-        int maxX = Math.max(from.x, to.x) + size / 2;
-        int maxY = Math.max(from.y, to.y) + size / 2;
+        for (int i = 0; i <= steps; i++) {
+            double t = (double) i / steps;
+            int xPos = (int) (from.x + (to.x - from.x) * t);
+            int yPos = (int) (from.y + (to.y - from.y) * t);
 
-        // Clamp to canvas bounds
-        minX = Math.max(0, minX);
-        minY = Math.max(0, minY);
-        maxX = Math.min(canvasImage.getWidth() - 1, maxX);
-        maxY = Math.min(canvasImage.getHeight() - 1, maxY);
+            eraseCircle(canvasImage, xPos, yPos, size);
+        }
 
-        // Loop over the pixels inside the affected area
+        canvas.repaint();
+    }
+
+    private void eraseCircle(BufferedImage img, int centerX, int centerY, int radius) {
+        int rSquared = radius * radius;
+
+        int minX = Math.max(0, centerX - radius);
+        int minY = Math.max(0, centerY - radius);
+        int maxX = Math.min(img.getWidth() - 1, centerX + radius);
+        int maxY = Math.min(img.getHeight() - 1, centerY + radius);
+
         for (int y = minY; y <= maxY; y++) {
             for (int x = minX; x <= maxX; x++) {
-                // Check if pixel is within the eraser circle
-                double dist = from.distance(x, y);
-                if (dist <= size / 2.0) {
-                    int rgba = canvasImage.getRGB(x, y);
+                int dx = x - centerX;
+                int dy = y - centerY;
+
+                if (dx * dx + dy * dy <= rSquared) { // inside the circle
+                    int rgba = img.getRGB(x, y);
                     int alpha = (rgba >> 24) & 0xFF;
                     int red = (rgba >> 16) & 0xFF;
                     int green = (rgba >> 8) & 0xFF;
                     int blue = rgba & 0xFF;
 
-                    // Calculate new alpha
                     int newAlpha = (int)(alpha * (1.0f - force));
                     if (newAlpha < 0) newAlpha = 0;
 
-                    // Write pixel back
                     int newRGBA = (newAlpha << 24) | (red << 16) | (green << 8) | blue;
-                    canvasImage.setRGB(x, y, newRGBA);
+                    img.setRGB(x, y, newRGBA);
                 }
             }
         }
-
-        canvas.repaint();
     }
 
     public int getSize() {

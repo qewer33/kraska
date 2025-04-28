@@ -108,8 +108,12 @@ public class CanvasSidebar extends JPanel {
         if (tool instanceof ToolOptionsProvider provider) {
             JPanel optionsPanel = provider.getToolOptionsPanel();
             toolOptionsContainer.add(optionsPanel);
+            setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10)); // Reset fix
         } else {
-            toolOptionsContainer.add(new JLabel("No options available."));
+            ToolOptionsPanel panel = new ToolOptionsPanel();
+            panel.addComponent(new JLabel("No options available."));
+            toolOptionsContainer.add(panel);
+            setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 10)); // Hacky fix to prevent sidebar from moving
         }
 
         toolOptionsContainer.revalidate();

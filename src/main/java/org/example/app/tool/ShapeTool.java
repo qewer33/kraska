@@ -21,12 +21,15 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         HEXAGON,
         LIGHTNING,
         STAR,
-        HEART
+        HEART,
+        TURKISH_FLAG,
+        GAZI_LOGO,
+        JAVA_LOGO
     }
 
     private ShapeType shapeType = ShapeType.LINE;
     private boolean filled = false;
-    private int thickness = 2;
+    private int thickness = 5;
     private Point startPoint;
     private final ColorManager colorManager = ColorManager.getInstance();
 
@@ -132,6 +135,18 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
                 case LIGHTNING -> drawLightning(g2d, startPoint, current);
                 case STAR -> drawStar(g2d, startPoint, current);
                 case HEART -> drawHeart(g2d, startPoint, current);
+                case TURKISH_FLAG -> {
+                    Image img = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/image/turkish_flag.png"))).getImage();
+                    drawImageShape(g2d, startPoint, current, img, shiftDown);
+                }
+                case GAZI_LOGO -> {
+                    Image img = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/image/gazi_logo.png"))).getImage();
+                    drawImageShape(g2d, startPoint, current, img, shiftDown);
+                }
+                case JAVA_LOGO -> {
+                    Image img = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/image/java_logo.png"))).getImage();
+                    drawImageShape(g2d, startPoint, current, img, shiftDown);
+                }
             }
 
             g2d.dispose();
@@ -155,7 +170,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         JLabel shapeLabel = new JLabel("Shape:");
 
         // 4x2 Toggle button grid
-        JPanel buttonGrid = new JPanel(new GridLayout(2, 4, 5, 5));
+        JPanel buttonGrid = new JPanel(new GridLayout(3, 4, 5, 5));
         ButtonGroup shapeGroup = new ButtonGroup();
 
         HashMap<ShapeType, ImageIcon> shapeIcons = new HashMap<>();
@@ -167,6 +182,9 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         shapeIcons.put(ShapeType.LIGHTNING, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/shape_lightning.png"))));
         shapeIcons.put(ShapeType.STAR, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/shape_star.png"))));
         shapeIcons.put(ShapeType.HEART, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/shape_heart.png"))));
+        shapeIcons.put(ShapeType.TURKISH_FLAG, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/turkish_flag.png"))));
+        shapeIcons.put(ShapeType.GAZI_LOGO, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/gazi_logo.png"))));
+        shapeIcons.put(ShapeType.JAVA_LOGO, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape/java_logo.png"))));
 
         for (ShapeType type : ShapeType.values()) {
             JToggleButton btn = new JToggleButton(shapeIcons.get(type));
@@ -182,7 +200,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         }
 
         // Fill checkbox
-        JCheckBox fillBox = new JCheckBox("Filled");
+        JCheckBox fillBox = new JCheckBox("Fill shape");
         fillBox.setSelected(filled);
         fillBox.addItemListener(e -> filled = fillBox.isSelected());
         fillBox.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -191,7 +209,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         JLabel thicknessLabel = new JLabel("Thickness: " + thickness + "px");
         thicknessLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JSlider thicknessSlider = new JSlider(1, 20, thickness);
+        JSlider thicknessSlider = new JSlider(1, 100, thickness);
         thicknessSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
         thicknessSlider.setMaximumSize(new Dimension(200, 40));
         thicknessSlider.addChangeListener(e -> {
@@ -323,6 +341,31 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             g2d.setColor(colorManager.getPrimary());
         }
         g2d.draw(path);
+    }
+
+    private void drawImageShape(Graphics2D g2d, Point start, Point end, Image image, boolean shiftDown) {
+        if (image == null) return;
+
+        int x = Math.min(start.x, end.x);
+        int y = Math.min(start.y, end.y);
+        int w = Math.abs(end.x - start.x);
+        int h = Math.abs(end.y - start.y);
+
+        if (shiftDown) {
+            // Keep aspect ratio of image
+            double imgAspect = (double) image.getWidth(null) / image.getHeight(null);
+            double boxAspect = (double) w / h;
+
+            if (imgAspect > boxAspect) {
+                // Image is wider than box — adjust height
+                h = (int) (w / imgAspect);
+            } else {
+                // Image is taller than box — adjust width
+                w = (int) (h * imgAspect);
+            }
+        }
+
+        g2d.drawImage(image, x, y, w, h, null);
     }
 }
 
