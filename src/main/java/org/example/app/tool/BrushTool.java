@@ -7,11 +7,17 @@ import org.example.gui.canvas.CanvasPainter;
 
 import org.example.gui.screen.component.ToolOptionsPanel;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
@@ -21,7 +27,11 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
         BASIC,
         MARKER,
         CALLIGRAPHY,
-        PENCIL
+        PENCIL,
+        BRISTLES,
+        CHALK,
+        WATERBRUSH,
+        ROLLER
     }
 
     private final ColorManager colorManager;
@@ -33,6 +43,8 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
     private float force = 1.0f;
     private float hardness = 1.0f;
     private boolean antialiased;
+
+    private BrushResourceProvider brushResourceProvider = new BrushResourceProvider();
 
     public BrushTool(Color defaultColor, int defaultSize) {
         super("Brush");
@@ -77,7 +89,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
         ToolOptionsPanel panel = new ToolOptionsPanel();
 
         JLabel brushTypeLabel = new JLabel("Brush: " + Util.getDisplayName(brushShape.name()));
-        JPanel brushShapePanel = new JPanel(new GridLayout(1, 4, 5, 5));
+        JPanel brushShapePanel = new JPanel(new GridLayout(2, 4, 5, 5));
         ButtonGroup brushShapeGroup = new ButtonGroup();
 
         HashMap<BrushShape, ImageIcon> brushIcons = new HashMap<>();
@@ -85,6 +97,10 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
         brushIcons.put(BrushShape.MARKER, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/brush/brush_marker.jpg"))));
         brushIcons.put(BrushShape.CALLIGRAPHY, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/brush/brush_calligraphy.jpg"))));
         brushIcons.put(BrushShape.PENCIL, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/brush/brush_pencil.jpg"))));
+        brushIcons.put(BrushShape.BRISTLES, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/brush/brush_bristles.jpg"))));
+        brushIcons.put(BrushShape.CHALK, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/brush/brush_chalk.jpg"))));
+        brushIcons.put(BrushShape.WATERBRUSH, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/brush/brush_waterbrush.jpg"))));
+        brushIcons.put(BrushShape.ROLLER, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/brush/brush_roller.jpg"))));
 
         for (BrushShape shape : BrushShape.values()) {
             JToggleButton button = new JToggleButton(brushIcons.get(shape));
@@ -181,14 +197,16 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
             int x = (int) (from.x + (to.x - from.x) * t);
             int y = (int) (from.y + (to.y - from.y) * t);
 
-            drawBrushShape(g2d, x, y);
+            double angle = Math.atan2(to.y - from.y, to.x - from.x); // direction
+
+            drawBrushShape(g2d, x, y, angle);
         }
 
         g2d.dispose();
         canvas.repaint();
     }
 
-    private void drawBrushShape(Graphics2D g2d, int x, int y) {
+    private void drawBrushShape(Graphics2D g2d, int x, int y, double angle) {
         switch (brushShape) {
             case BASIC -> {
                 g2d.fillOval(x - size / 2, y - size / 2, size, size);
@@ -255,30 +273,76 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
                     g2d.setPaint(oldPaint);
                 }
             }
+            case BRISTLES -> {
+                drawStamp(g2d, brushResourceProvider.getBrushTexture("texture_bristles"), x, y, angle, 0.4f, size, color); // example values
+            }
+            case CHALK -> {
+                drawStamp(g2d, brushResourceProvider.getBrushTexture("texture_chalk"), x, y, angle, 0.025f, size, color); // example values
+            }
+            case WATERBRUSH -> {
+                drawStamp(g2d, brushResourceProvider.getBrushTexture("texture_waterbrush"), x, y, angle, 0.1f, size, color); // example values
+            }
+            case ROLLER -> {
+                drawStamp(g2d, brushResourceProvider.getBrushTexture("texture_roller"), x, y, angle, 0.1f, size, color); // example values
+            }
         }
     }
 
-    public int getSize() {
-        return this.size;
+    private void drawStamp(Graphics2D g2d, BufferedImage stamp, int x, int y, double angle, float opacity, int size, Color color) {
+        Graphics2D g = (Graphics2D) g2d.create();
+
+        g.translate(x, y);
+        g.rotate(angle);
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+
+        // Step 1: Create a tinted image using color + DST_IN mask from the stamp
+        BufferedImage tinted = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D tg = tinted.createGraphics();
+
+        // Fill with selected color
+        tg.setColor(color);
+        tg.fillRect(0, 0, size, size);
+
+        // Mask the brush texture (assumes it's grayscale)
+        tg.setComposite(AlphaComposite.DstIn);
+        tg.drawImage(stamp, 0, 0, size, size, null);
+
+        tg.dispose();
+
+        // Step 2: Draw the tinted image
+        g.drawImage(tinted, -size / 2, -size / 2, null);
+
+        g.dispose();
     }
 
-    public void setSize(int size) {
-        this.size = size;
-    }
+    private static class BrushResourceProvider {
+        private HashMap<String, BufferedImage> brushTextures = new HashMap<>();
 
-    public float getForce() {
-        return force;
-    }
+        public BrushResourceProvider() {
+            loadBrushTextures();
+        }
 
-    public void setForce(float force) {
-        this.force = force;
-    }
+        public BufferedImage getBrushTexture(String name) {
+            return brushTextures.get(name);
+        }
 
-    public boolean isAntialiased() {
-        return antialiased;
-    }
-
-    public void setAntialiased(boolean antialiased) {
-        this.antialiased = antialiased;
+        public void loadBrushTextures() {
+            brushTextures.clear();
+            for (String name : new String[] {
+                    "texture_bristles",
+                    "texture_chalk",
+                    "texture_waterbrush",
+                    "texture_roller",
+            }) {
+                if (!brushTextures.containsKey(name)) {
+                    try {
+                        BufferedImage texture = ImageIO.read(Objects.requireNonNull(getClass().getResource("/icons/brush/texture/" + name + ".png")));
+                        brushTextures.put(name, texture);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
     }
 }

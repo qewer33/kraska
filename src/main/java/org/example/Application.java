@@ -35,7 +35,7 @@ public class Application {
     private JFrame createMainWindow() {
         JFrame frame = new JFrame("Kraska");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(1280, 720);
+        frame.setSize(1600, 900);
         frame.setLayout(new BorderLayout());
 
         frame.setJMenuBar(new ApplicationMenu());
