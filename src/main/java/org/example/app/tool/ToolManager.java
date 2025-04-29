@@ -26,11 +26,11 @@ public class ToolManager {
     }
 
     private void registerDefaultTools() {
-        registerTool(new BrushTool(Color.BLACK, 5));
-        registerTool(new EraserTool(5));
+        registerTool(new BrushTool(Color.BLACK, 12));
+        registerTool(new EraserTool(12));
         registerTool(new ColorPickerTool());
         registerTool(new BucketTool());
-        registerTool(new AirBrushTool(10,50));
+        registerTool(new AirBrushTool(12,50));
         registerTool(new ShapeTool());
     }
 

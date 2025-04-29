@@ -1,5 +1,6 @@
 package org.example.app.tool;
 
+import org.example.app.Util;
 import org.example.app.color.ColorManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
@@ -30,6 +31,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
     private BrushShape brushShape = BrushShape.BASIC;
     private int size;
     private float force = 1.0f;
+    private float hardness = 1.0f;
     private boolean antialiased;
 
     public BrushTool(Color defaultColor, int defaultSize) {
@@ -74,7 +76,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
     public JPanel getToolOptionsPanel() {
         ToolOptionsPanel panel = new ToolOptionsPanel();
 
-        JLabel brushTypeLabel = new JLabel("Brush: " + getBrushShapeName());
+        JLabel brushTypeLabel = new JLabel("Brush: " + Util.getDisplayName(brushShape.name()));
         JPanel brushShapePanel = new JPanel(new GridLayout(1, 4, 5, 5));
         ButtonGroup brushShapeGroup = new ButtonGroup();
 
@@ -88,7 +90,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
             JToggleButton button = new JToggleButton(brushIcons.get(shape));
             button.addActionListener(e -> {
                 brushShape = shape;
-                brushTypeLabel.setText("Brush: " + getBrushShapeName());
+                brushTypeLabel.setText("Brush: " + Util.getDisplayName(brushShape.name()));
             });
             brushShapeGroup.add(button);
             brushShapePanel.add(button);
@@ -114,6 +116,14 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
             forceLabel.setText("Force: " + forceSlider.getValue() + "%");
         });
 
+        // Spacing slider
+        JLabel hardnessLabel = new JLabel("Hardness: " + (int)(hardness * 100) + "%");
+        JSlider hardnessSlider = new JSlider(30, 250, (int)(hardness * 100));
+        hardnessSlider.addChangeListener(e -> {
+            hardness = hardnessSlider.getValue() / 100f;
+            hardnessLabel.setText("Hardness: " + hardnessSlider.getValue() + "%");
+        });
+
         JCheckBox antialiasCheckbox = new JCheckBox("Antialiasing");
         antialiasCheckbox.setSelected(antialiased);
         antialiasCheckbox.addItemListener(e -> {
@@ -123,6 +133,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
         panel.addComponentGroup(new JComponent[]{brushTypeLabel, brushShapePanel});
         panel.addComponentGroup(new JComponent[]{sizeLabel, sizeSlider});
         panel.addComponentGroup(new JComponent[]{forceLabel, forceSlider});
+        panel.addComponentGroup(new JComponent[]{hardnessLabel, hardnessSlider});
         panel.addComponent(antialiasCheckbox);
 
         return panel;
@@ -161,16 +172,8 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
                 this.antialiased ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
         g2d.setColor(color);
 
-        float samplingFactor = 0.05f;
-        switch (brushShape) {
-            case MARKER -> {samplingFactor = 1.4f;}
-            case CALLIGRAPHY -> {samplingFactor = 1.5f;}
-            case PENCIL -> {samplingFactor = 0.6f;}
-            default -> {samplingFactor = 1.0f;}
-        }
-
         double distance = from.distance(to);
-        int steps = (int) (distance * samplingFactor);
+        int steps = (int) (distance * this.hardness);
         if (steps < 1) steps = 1;
 
         for (int i = 0; i <= steps; i++) {
@@ -253,10 +256,6 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
                 }
             }
         }
-    }
-
-    public String getBrushShapeName() {
-        return brushShape.name().substring(0, 1).toUpperCase() + brushShape.name().substring(1).toLowerCase();
     }
 
     public int getSize() {
