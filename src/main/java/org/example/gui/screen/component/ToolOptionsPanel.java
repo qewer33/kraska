@@ -48,4 +48,14 @@ public class ToolOptionsPanel extends JPanel {
             this.add(component, this.constraints);
         }
     }
+
+    // Insane layout hack
+    public void addEmptySpace() {
+        JPanel p0 = new JPanel(new CardLayout());
+        JSlider slider = new JSlider();
+        JPanel p1 = new JPanel();
+        p0.add(p1, "panel");
+        p0.add(slider, "slider");
+        this.addComponent(p0);
+    }
 }

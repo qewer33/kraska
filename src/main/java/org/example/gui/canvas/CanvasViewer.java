@@ -1,5 +1,8 @@
 package org.example.gui.canvas;
 
+import org.example.app.tool.AbstractTool;
+import org.example.app.tool.ToolManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -12,14 +15,25 @@ public class CanvasViewer extends JScrollPane {
     private Point panStartPoint;
     private Point viewStartPoint;
 
+    private final JLayeredPane layeredPane;
+    private final OverlayPanel overlayPanel;
+
     public CanvasViewer(Canvas canvas) {
         super();
         this.canvas = canvas;
+        this.canvas.setBorder(BorderFactory.createLineBorder(Color.GRAY, 3));
+
+        layeredPane = new JLayeredPane();
+        layeredPane.add(this.canvas, JLayeredPane.DEFAULT_LAYER );
+
+        overlayPanel = new OverlayPanel();
+        overlayPanel.setOpaque(false);
+        layeredPane.add(overlayPanel, JLayeredPane.PALETTE_LAYER);
 
         // Create wrapper panel to center the canvas and add border
         CheckerboardPanel backgroundPanel = new CheckerboardPanel();
-        this.canvas.setBorder(BorderFactory.createLineBorder(Color.GRAY, 3));
-        backgroundPanel.add(canvas);
+        backgroundPanel.add(layeredPane);
+
         setViewportView(backgroundPanel);
         setWheelScrollingEnabled(false); // Disable wheel scroll since it's used for zoom
         setupViewer();
@@ -28,6 +42,13 @@ public class CanvasViewer extends JScrollPane {
     private void setupViewer() {
         setPreferredSize(new Dimension(800, 600));
         getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                updateLayerBounds();
+            }
+        });
 
         // Still add wheel listener to viewer
         addMouseWheelListener(this::handleMouseWheel);
@@ -66,6 +87,15 @@ public class CanvasViewer extends JScrollPane {
         });
     }
 
+    private void updateLayerBounds() {
+        Dimension size = canvas.getPreferredSize();
+        canvas.setBounds(0, 0, size.width, size.height);
+        overlayPanel.setBounds(0, 0, size.width, size.height);
+        layeredPane.setPreferredSize(size);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+    }
+
     private void handleMouseWheel(MouseWheelEvent e) {
         if (e.isControlDown()) {
             double delta = -e.getPreciseWheelRotation() * 0.1;
@@ -101,6 +131,15 @@ public class CanvasViewer extends JScrollPane {
         canvas.setZoomFactor(zoomFactor);
         canvas.revalidate();
         canvas.repaint();
+
+        Dimension newSize = canvas.getPreferredSize();
+        layeredPane.setPreferredSize(newSize);
+        canvas.setBounds(0, 0, newSize.width, newSize.height);
+        overlayPanel.setBounds(0, 0, newSize.width, newSize.height);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+        overlayPanel.repaint();
+
         this.firePropertyChange("zoomFactor", oldValue, zoomFactor);
     }
 
@@ -110,6 +149,17 @@ public class CanvasViewer extends JScrollPane {
 
     public Canvas getCanvas() {
         return canvas;
+    }
+
+    private class OverlayPanel extends JPanel {
+        @Override
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            AbstractTool activeTool = ToolManager.getInstance().getActiveTool();
+            if (activeTool instanceof OverlayPainter painter) {
+                painter.paintOverlay((Graphics2D) g.create(), zoomFactor);
+            }
+        }
     }
 
     private static class CheckerboardPanel extends JPanel {
