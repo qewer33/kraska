@@ -24,6 +24,7 @@ public class CanvasToolbar extends JToolBar {
         ImageIcon airBrushIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/airBrush.png")));
         ImageIcon shapeIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape.png")));
         ImageIcon selectionIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/selection.png")));
+        ImageIcon textIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/text.png")));
 
         // === Tool Buttons ===
         JToggleButton brushBtn = new JToggleButton(brushIcon);
@@ -34,6 +35,7 @@ public class CanvasToolbar extends JToolBar {
         JToggleButton airBrushButton = new JToggleButton(airBrushIcon);
         JToggleButton shapeButton = new JToggleButton(shapeIcon);
         JToggleButton selectionButton = new JToggleButton(selectionIcon);
+        JToggleButton textButton = new JToggleButton(textIcon);
 
         ButtonGroup toolGroup = new ButtonGroup();
         toolGroup.add(brushBtn);
@@ -43,6 +45,7 @@ public class CanvasToolbar extends JToolBar {
         toolGroup.add(airBrushButton);
         toolGroup.add(shapeButton);
         toolGroup.add(selectionButton);
+        toolGroup.add(textButton);
 
         // Change active tool
         brushBtn.setSelected(true);
@@ -53,6 +56,7 @@ public class CanvasToolbar extends JToolBar {
         airBrushButton.addActionListener(e -> toolManager.setActiveTool("Air Brush"));
         shapeButton.addActionListener(e -> toolManager.setActiveTool("Shape"));
         selectionButton.addActionListener(e -> toolManager.setActiveTool("Selection"));
+        textButton.addActionListener(e -> toolManager.setActiveTool("Text Tool"));
 
         // Add buttons
         addSeparator(new Dimension(0, 5));
@@ -69,5 +73,7 @@ public class CanvasToolbar extends JToolBar {
         add(shapeButton);
         addSeparator(new Dimension(0, 5));
         add(selectionButton);
+        addSeparator(new Dimension(0, 5));
+        add(textButton);
     }
 }
