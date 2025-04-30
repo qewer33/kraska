@@ -4,16 +4,20 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.example.gui.ApplicationMenu;
 import org.example.gui.screen.DashboardScreen;
+import org.example.gui.canvas.Canvas;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class Application {
     public void run() {
         setupTheme();
 
         SwingUtilities.invokeLater(() -> {
-            JFrame mainWindow = createMainWindow();
+            Canvas canvas = new Canvas();
+            JFrame mainWindow = createMainWindow(canvas);
             mainWindow.setVisible(true);
         });
     }
@@ -32,7 +36,7 @@ public class Application {
         }
     }
 
-    private JFrame createMainWindow() {
+    private JFrame createMainWindow(Canvas canvas) {
         JFrame frame = new JFrame("Kraska");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(1600, 900);
@@ -43,6 +47,14 @@ public class Application {
         // Show DashboardScreen first
         DashboardScreen dashboardScreen = new DashboardScreen(frame);
         frame.add(dashboardScreen, BorderLayout.CENTER);
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                canvas.shutdownAutosave(); // Safe shutdown
+                frame.dispose();
+            }
+        });
 
         return frame;
     }
