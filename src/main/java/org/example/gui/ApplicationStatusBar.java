@@ -21,9 +21,9 @@ public class ApplicationStatusBar extends JPanel {
         zoomSlider.setMaximumSize(new Dimension(125, 20));
 
         // Get icons from resource
-        ImageIcon zoomInIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/zoom_in.png")));
-        ImageIcon zoomOutIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/zoom_out.png")));
-        ImageIcon cursor = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/cursor.png")));
+        ImageIcon zoomInIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/status/zoom_in.png")));
+        ImageIcon zoomOutIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/status/zoom_out.png")));
+        ImageIcon cursor = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/status/cursor.png")));
         JLabel cursorLabel = new JLabel(cursor);
 
         // Update canvas zoom factor based on zoom slider

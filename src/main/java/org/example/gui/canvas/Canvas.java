@@ -218,8 +218,8 @@ public class Canvas extends JPanel {
         if (latest != null) {
             int response = JOptionPane.showConfirmDialog(
                     this,
-                    "Son otomatik kayıt yüklensin mi?",
-                    "Otomatik Kaydı Yükle",
+                    "Would you like to load the most recent autosave?",
+                    "Autosave Found",
                     JOptionPane.YES_NO_OPTION
             );
 
@@ -360,6 +360,13 @@ public class Canvas extends JPanel {
 
     public BufferedImage getCanvasImage() {
         return buffer;
+    }
+    public void setCanvasImage(BufferedImage newImage) {
+        this.buffer = newImage;
+        this.logicalSize = new Dimension(newImage.getWidth(), newImage.getHeight());
+        setSize(getPreferredSize());
+        revalidate();
+        repaint();
     }
 
     public ToolManager getToolManager() {
