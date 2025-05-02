@@ -18,14 +18,14 @@ public class CanvasToolbar extends JToolBar {
         setOrientation(JToolBar.VERTICAL);
 
         // Get images from resource
-        ImageIcon brushIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/brush.png")));
-        ImageIcon eraserIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/eraser.png")));
-        ImageIcon eyedropperIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/eyedropper.png")));
-        ImageIcon bucketIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/bucket.png")));
-        ImageIcon airBrushIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/airBrush.png")));
-        ImageIcon shapeIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/shape.png")));
-        ImageIcon selectionIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/selection.png")));
-        ImageIcon textIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/text.png")));
+        ImageIcon brushIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/tools/brush.png")));
+        ImageIcon eraserIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/tools/eraser.png")));
+        ImageIcon eyedropperIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/tools/eyedropper.png")));
+        ImageIcon bucketIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/tools/bucket.png")));
+        ImageIcon airBrushIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/tools/airBrush.png")));
+        ImageIcon shapeIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/tools/shape.png")));
+        ImageIcon selectionIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/tools/selection.png")));
+        ImageIcon textIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/tools/text.png")));
 
         // === Tool Buttons ===
         JToggleButton brushBtn = new JToggleButton(brushIcon);

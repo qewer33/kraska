@@ -8,6 +8,16 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import java.util.Stack;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+
 
 public class Canvas extends JPanel {
     private Dimension logicalSize = new Dimension(800, 600);
@@ -15,6 +25,10 @@ public class Canvas extends JPanel {
     private BufferedImage tempBuffer;
     private float tempBufferAlpha = 1.0f;
     private double zoomFactor = 1.0;
+    private long lastSavedTimestamp = 0;
+    private boolean canvasChangedSinceLastSave = false;
+    private final ScheduledExecutorService autosaveExecutor = Executors.newSingleThreadScheduledExecutor();
+
 
     // Managers
     private final ColorManager colorManager;
@@ -30,11 +44,17 @@ public class Canvas extends JPanel {
         colorManager = ColorManager.getInstance();
         toolManager = ToolManager.getInstance();
         this.logicalSize = new Dimension(width, height);
+        autosaveExecutor.scheduleAtFixedRate(this::autoSave, 5, 5, TimeUnit.SECONDS);
         setPreferredSize(logicalSize);
         setBackground(backgroundColor); // Set the background color
         initializeCanvas(backgroundColor);
         setupMouseListeners();
         setOpaque(false);
+    }
+
+    public Canvas(){
+        colorManager = ColorManager.getInstance();
+        toolManager = ToolManager.getInstance();
     }
 
     private void initializeCanvas(Color backgroundColor) {
@@ -45,6 +65,7 @@ public class Canvas extends JPanel {
         g2d.dispose();
 
         tempBuffer = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
+        loadLatestAutoSave();
     }
 
     @Override
@@ -131,6 +152,95 @@ public class Canvas extends JPanel {
         g2d.dispose();
         undoStack.push(copy);
         redoStack.clear();
+        canvasChangedSinceLastSave = true;
+    }
+
+    // Automatically save the canvas if changes have been made
+    private void autoSave() {
+        if (!canvasChangedSinceLastSave || buffer==null) return; // If there are no changes or buffer is null, skip autosaving
+
+        try {
+            // Create the autosave directory if it doesn't exist
+            File autosaveDir = new File(".autosave");
+            if (!autosaveDir.exists()) autosaveDir.mkdirs();
+
+            // Generate a filename based on the current timestamp
+            String filename = "autosave_" + System.currentTimeMillis() + ".png";
+            File file = new File(autosaveDir, filename);
+
+            // Create a safe copy of the canvas to save
+            BufferedImage safeCopy = copyCanvas();
+
+            // Save the canvas copy as a PNG file
+            ImageIO.write(safeCopy, "PNG", file);
+
+            // Update the timestamp and reset the change flag
+            lastSavedTimestamp = System.currentTimeMillis();
+            canvasChangedSinceLastSave = false;
+
+            // Get all autosave files in the directory and clean up old ones if more than 3
+            File[] files = autosaveDir.listFiles((dir, name) -> name.endsWith(".png"));
+            if (files != null && files.length > 3) {
+                Arrays.sort(files, Comparator.comparingLong(File::lastModified));
+
+                for (int i = 0; i < files.length - 3; i++) {
+                    files[i].delete();
+                }
+            }
+
+            // Log the location where the autosave occurred
+            System.out.println("Auto-saved at: " + file.getAbsolutePath());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    // Shutdown the autosave functionality (stop the autosave executor)
+    public void shutdownAutosave() {
+        autosaveExecutor.shutdownNow();
+    }
+
+    // Load the latest autosave file if it exists
+    public void loadLatestAutoSave() {
+        File autosaveDir = new File(".autosave");
+        if (!autosaveDir.exists()) return;
+
+        // Get all .png files in the autosave directory
+        File[] files = autosaveDir.listFiles((dir, name) -> name.endsWith(".png"));
+        if (files == null || files.length == 0) return;
+
+        // Find the most recently modified file
+        File latest = Arrays.stream(files)
+                .max(Comparator.comparingLong(File::lastModified))
+                .orElse(null);
+
+        // If a valid autosave file is found, prompt the user to load it
+        if (latest != null) {
+            int response = JOptionPane.showConfirmDialog(
+                    this,
+                    "Would you like to load the most recent autosave?",
+                    "Autosave Found",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            // If user selects "Yes", load the autosave file
+            if (response != JOptionPane.YES_OPTION) return;
+
+            try {
+                // Read the latest autosave file into a BufferedImage
+                BufferedImage loadedImage = ImageIO.read(latest);
+                if (loadedImage != null) {
+                    // Draw the loaded image onto the buffer (canvas)
+                    Graphics2D g2d = buffer.createGraphics();
+                    g2d.drawImage(loadedImage, 0, 0, null);
+                    g2d.dispose();
+                    repaint();
+                    System.out.println("Auto-saved canvas loaded from: " + latest.getAbsolutePath());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void undo() {
@@ -250,6 +360,13 @@ public class Canvas extends JPanel {
 
     public BufferedImage getCanvasImage() {
         return buffer;
+    }
+    public void setCanvasImage(BufferedImage newImage) {
+        this.buffer = newImage;
+        this.logicalSize = new Dimension(newImage.getWidth(), newImage.getHeight());
+        setSize(getPreferredSize());
+        revalidate();
+        repaint();
     }
 
     public ToolManager getToolManager() {

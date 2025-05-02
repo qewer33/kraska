@@ -17,7 +17,8 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
     private String fontName = "Arial";
     private boolean isBold = false;
     private boolean isItalic = false;
-    private boolean activateSelection = false;
+    private JTextField activeTextField = null;
+
 
     public TextTool() {
         super("Text Tool");
@@ -35,6 +36,7 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         JComboBox<String> fontComboBox = new JComboBox<>(fonts);
         fontComboBox.setSelectedItem(fontName);
+        fontComboBox.setMaximumRowCount(10);
 
         // Font size slider
         JLabel sizeLabel = new JLabel("Size: " + fontSize);
@@ -53,38 +55,42 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         boldCheck.addActionListener(e -> isBold = boldCheck.isSelected());
         italicCheck.addActionListener(e -> isItalic = italicCheck.isSelected());
 
-        // Activate selection checkbox
-        JCheckBox activateSelectionBox = new JCheckBox("Select after creation");
-        activateSelectionBox.setSelected(activateSelection);
-        activateSelectionBox.addItemListener(e -> activateSelection = activateSelectionBox.isSelected());
-        activateSelectionBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         // Add components to the panel
         panel.addComponentGroup(new JComponent[]{fontLabel, fontComboBox});
         panel.addComponentGroup(new JComponent[]{sizeLabel, sizeSlider});
         panel.addComponentGroup(new JComponent[]{boldCheck, italicCheck});
-        panel.addComponent(activateSelectionBox);
 
         return panel;
     }
 
     @Override
     public void onMousePress(Canvas canvas, MouseEvent e) {
+        if (activeTextField != null) return; // Zaten bir yazı kutusu açık, yenisini oluşturma
         if (e.getButton() != MouseEvent.BUTTON1 && e.getButton() != MouseEvent.BUTTON3) return;
 
-        // Set primary or secondary color based on mouse button
         this.color = e.getButton() == MouseEvent.BUTTON1 ? colorManager.getPrimary() : colorManager.getSecondary();
         Point point = canvas.getUnzoomedPoint(e.getPoint());
 
-        // Show a text input dialog
-        JTextField textField = new JTextField(20);
-        int result = JOptionPane.showConfirmDialog(null, textField, "Enter Text", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            String userText = textField.getText();
+        activeTextField = new JTextField();
+        activeTextField.setFont(new Font(fontName, (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0), fontSize));
+        activeTextField.setForeground(color);
+        activeTextField.setBounds(point.x, point.y, 200, fontSize + 10);
+
+        canvas.setLayout(null);
+        canvas.add(activeTextField);
+        canvas.repaint();
+        activeTextField.requestFocus();
+
+        // Enter'a basıldığında yazıyı çiz ve alanı temizle
+        activeTextField.addActionListener(ev -> {
+            String userText = activeTextField.getText();
+            canvas.remove(activeTextField);
+            canvas.repaint();
             if (!userText.isEmpty()) {
-                drawText(canvas, point.x, point.y, userText);
+                drawText(canvas, point.x, point.y + fontSize, userText);
             }
-        }
+            activeTextField = null; // Yeni kutu açılabilsin
+        });
     }
 
     // Draw the specified text at the given position

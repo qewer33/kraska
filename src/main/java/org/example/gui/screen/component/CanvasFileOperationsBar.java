@@ -14,13 +14,13 @@ public class CanvasFileOperationsBar extends JToolBar {
         setOrientation(JToolBar.HORIZONTAL);
 
         // Get images from resource
-        ImageIcon newIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/new.png")));
-        ImageIcon openIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/open.png")));
-        ImageIcon undoIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/undo.png")));
-        ImageIcon redoIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/redo.png")));
-        ImageIcon saveIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/save.png")));
-        ImageIcon saveAsIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/saveAs.png")));
-        ImageIcon exportIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/export.png")));
+        ImageIcon newIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/new.png")));
+        ImageIcon openIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/open.png")));
+        ImageIcon undoIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/undo.png")));
+        ImageIcon redoIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/redo.png")));
+        ImageIcon saveIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/save.png")));
+        ImageIcon saveAsIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/saveAs.png")));
+        ImageIcon exportIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/export.png")));
 
         // === Tool Buttons ===
         JButton newButton = new JButton(newIcon);

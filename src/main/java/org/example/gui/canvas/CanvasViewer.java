@@ -87,7 +87,7 @@ public class CanvasViewer extends JScrollPane {
         });
     }
 
-    private void updateLayerBounds() {
+    public void updateLayerBounds() {
         Dimension size = canvas.getPreferredSize();
         canvas.setBounds(0, 0, size.width, size.height);
         overlayPanel.setBounds(0, 0, size.width, size.height);

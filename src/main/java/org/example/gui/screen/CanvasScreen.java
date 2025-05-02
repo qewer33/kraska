@@ -8,6 +8,7 @@ import org.example.gui.ApplicationStatusBar;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasViewer;
 import org.example.gui.screen.component.CanvasFileOperationsBar;
+import org.example.gui.screen.component.CanvasRotateBar;
 import org.example.gui.screen.component.CanvasSidebar;
 import org.example.gui.screen.component.CanvasToolbar;
 
@@ -25,6 +26,7 @@ public class CanvasScreen extends AbstractScreen {
         ApplicationStatusBar statusBar = new ApplicationStatusBar(this.viewer);
         CanvasToolbar toolbar = new CanvasToolbar();
         CanvasFileOperationsBar fileOperationsBar = new CanvasFileOperationsBar(this.canvas);
+        CanvasRotateBar rotateBar = new CanvasRotateBar(this.canvas,this.viewer);
 
         ToolManager toolManager = ToolManager.getInstance();
 
@@ -32,7 +34,15 @@ public class CanvasScreen extends AbstractScreen {
         this.add(toolbar, BorderLayout.WEST); // Add toolbar at the top
         this.add(viewer, BorderLayout.CENTER); // Canvas viewer in center
         this.add(statusBar, BorderLayout.SOUTH);
-        this.add(fileOperationsBar, BorderLayout.NORTH);
+
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // Yan yana dizilim
+        topPanel.add(fileOperationsBar);
+        topPanel.add(Box.createRigidArea(new Dimension(380, 0)));
+        topPanel.add(rotateBar);
+
+        this.add(topPanel, BorderLayout.NORTH);
+
 
         CanvasSidebar sidebar = new CanvasSidebar();
         sidebar.updateToolOptions(toolManager.getActiveTool());
