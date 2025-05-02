@@ -440,4 +440,10 @@ public class SelectionTool extends AbstractTool implements CanvasPainter, Overla
 
         return panel;
     }
+
+    public void setNewSelection(Selection sel) {
+        this.currentSelection = sel;
+        this.startPoint = new Point(sel.getX(), sel.getY());
+        this.currentPoint = new Point(sel.getX()+sel.getWidth(), sel.getY()+sel.getHeight());
+    }
 }

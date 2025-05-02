@@ -2,6 +2,7 @@ package org.example.gui.screen.component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
 import java.util.Objects;
 
 import org.example.app.tool.ToolManager;
@@ -28,6 +29,7 @@ public class CanvasToolbar extends JToolBar {
 
         // === Tool Buttons ===
         JToggleButton brushBtn = new JToggleButton(brushIcon);
+        brushBtn.setSelected(true);
         JToggleButton eraserBtn = new JToggleButton(eraserIcon);
         JToggleButton eyedropperBtn = new JToggleButton(eyedropperIcon);
         eyedropperBtn.setMargin(new Insets(0, 4, 0, 0));
@@ -38,25 +40,26 @@ public class CanvasToolbar extends JToolBar {
         JToggleButton textButton = new JToggleButton(textIcon);
 
         ButtonGroup toolGroup = new ButtonGroup();
-        toolGroup.add(brushBtn);
-        toolGroup.add(eraserBtn);
-        toolGroup.add(eyedropperBtn);
-        toolGroup.add(bucketButton);
-        toolGroup.add(airBrushButton);
-        toolGroup.add(shapeButton);
-        toolGroup.add(selectionButton);
-        toolGroup.add(textButton);
 
-        // Change active tool
-        brushBtn.setSelected(true);
-        brushBtn.addActionListener(e -> toolManager.setActiveTool("Brush"));
-        eraserBtn.addActionListener(e -> toolManager.setActiveTool("Eraser"));
-        eyedropperBtn.addActionListener(e -> toolManager.setActiveTool("Color Picker"));
-        bucketButton.addActionListener(e -> toolManager.setActiveTool("Bucket"));
-        airBrushButton.addActionListener(e -> toolManager.setActiveTool("Air Brush"));
-        shapeButton.addActionListener(e -> toolManager.setActiveTool("Shape"));
-        selectionButton.addActionListener(e -> toolManager.setActiveTool("Selection"));
-        textButton.addActionListener(e -> toolManager.setActiveTool("Text Tool"));
+        HashMap<String, JToggleButton> toolButtons = new HashMap<>();
+        toolButtons.put("Brush", brushBtn);
+        toolButtons.put("Eraser", eraserBtn);
+        toolButtons.put("Color Picker", eyedropperBtn);
+        toolButtons.put("Bucket", bucketButton);
+        toolButtons.put("Air Brush", airBrushButton);
+        toolButtons.put("Shape", shapeButton);
+        toolButtons.put("Selection", selectionButton);
+        toolButtons.put("Text Tool", textButton);
+        toolButtons.forEach((name, button) -> {
+            toolGroup.add(button);
+            button.addActionListener(e -> {
+                toolManager.setActiveTool(name);
+            });
+        });
+
+        toolManager.addToolChangeListener((oldTool, newTool) -> {
+            toolButtons.get(newTool.getName()).setSelected(true);
+        });
 
         // Add buttons
         addSeparator(new Dimension(0, 5));

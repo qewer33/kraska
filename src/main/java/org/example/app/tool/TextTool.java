@@ -17,6 +17,7 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
     private String fontName = "Arial";
     private boolean isBold = false;
     private boolean isItalic = false;
+    private boolean activateSelection = false;
 
     public TextTool() {
         super("Text Tool");
@@ -52,10 +53,17 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         boldCheck.addActionListener(e -> isBold = boldCheck.isSelected());
         italicCheck.addActionListener(e -> isItalic = italicCheck.isSelected());
 
+        // Activate selection checkbox
+        JCheckBox activateSelectionBox = new JCheckBox("Select after creation");
+        activateSelectionBox.setSelected(activateSelection);
+        activateSelectionBox.addItemListener(e -> activateSelection = activateSelectionBox.isSelected());
+        activateSelectionBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         // Add components to the panel
         panel.addComponentGroup(new JComponent[]{fontLabel, fontComboBox});
         panel.addComponentGroup(new JComponent[]{sizeLabel, sizeSlider});
         panel.addComponentGroup(new JComponent[]{boldCheck, italicCheck});
+        panel.addComponent(activateSelectionBox);
 
         return panel;
     }

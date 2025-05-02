@@ -4,12 +4,14 @@ import org.example.app.Util;
 import org.example.app.color.ColorManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
+import org.example.gui.canvas.Selection;
 import org.example.gui.screen.component.ToolOptionsPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -31,7 +33,9 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
     private ShapeType shapeType = ShapeType.LINE;
     private boolean filled = false;
     private int thickness = 5;
+    private boolean activateSelection = false;
     private Point startPoint;
+    private Point lastPoint;
     private final ColorManager colorManager = ColorManager.getInstance();
 
     public ShapeTool() {
@@ -50,6 +54,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
     public void onMouseDrag(Canvas canvas, MouseEvent e) {
         if (startPoint != null) {
             Point current = canvas.getUnzoomedPoint(e.getPoint());
+            lastPoint = current;
             boolean shiftDown = (e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) != 0;
 
             canvas.clearTempBuffer();
@@ -157,10 +162,32 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
 
     @Override
     public void onMouseRelease(Canvas canvas, MouseEvent e) {
-        if (startPoint != null) {
-            canvas.applyTempBuffer(1.0f); // full opacity for shapes (or you can add force later if you want)
-            startPoint = null;
+        if (startPoint != null && !activateSelection) {
+            canvas.applyTempBuffer(1.0f);
         }
+        if (startPoint != null && activateSelection) {
+            int x = Math.min(startPoint.x, lastPoint.x);
+            int y = Math.min(startPoint.y, lastPoint.y);
+            int w = Math.abs(startPoint.x - lastPoint.x);
+            int h = Math.abs(startPoint.y - lastPoint.y);
+
+            Selection sel = new Selection(new Rectangle(x, y, w, h));
+
+            BufferedImage tempBuf = canvas.getTempBuffer();
+            BufferedImage copy = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = copy.createGraphics();
+            g.drawImage(tempBuf, 0, 0, w, h, x, y, x + w, y + h, null);
+            g.dispose();
+
+            sel.setContent(copy);
+
+            ToolManager toolManager = ToolManager.getInstance();
+            ((SelectionTool) toolManager.getTool("Selection")).setNewSelection(sel);
+            toolManager.setActiveTool("Selection");
+
+            canvas.clearTempBuffer();
+        }
+        startPoint = null;
     }
 
     @Override
@@ -221,6 +248,12 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             thicknessLabel.setText("Thickness: " + thickness + "px");
         });
 
+        // Activate selection checkbox
+        JCheckBox activateSelectionBox = new JCheckBox("Select after creation");
+        activateSelectionBox.setSelected(activateSelection);
+        activateSelectionBox.addItemListener(e -> activateSelection = activateSelectionBox.isSelected());
+        activateSelectionBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         panel.addComponentGroup(new JComponent[]{
                 shapeLabel,
                 buttonGrid,
@@ -230,6 +263,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
                 thicknessSlider,
         });
         panel.addComponent(fillBox);
+        panel.addComponent(activateSelectionBox);
 
         return panel;
     }
