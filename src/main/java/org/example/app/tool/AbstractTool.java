@@ -11,6 +11,6 @@ public abstract class AbstractTool {
 
     public String getName() { return name; }
 
-    public void onActivate(Canvas canvas) {}
-    public void onDeactivate(Canvas canvas) {}
+    public void onActivate() {}
+    public void onDeactivate() {}
 }

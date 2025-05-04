@@ -4,7 +4,8 @@ import org.example.app.Util;
 import org.example.app.color.ColorManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
-import org.example.gui.canvas.Selection;
+import org.example.gui.canvas.selection.Selection;
+import org.example.gui.canvas.selection.SelectionManager;
 import org.example.gui.screen.component.ToolOptionsPanel;
 
 import javax.swing.*;
@@ -36,10 +37,17 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
     private boolean activateSelection = false;
     private Point startPoint;
     private Point lastPoint;
+
     private final ColorManager colorManager = ColorManager.getInstance();
+    private final SelectionManager selectionManager = SelectionManager.getInstance();
 
     public ShapeTool() {
         super("Shape");
+    }
+
+    @Override
+    public void onActivate() {
+        selectionManager.restrictToolInput = true;
     }
 
     @Override
@@ -180,10 +188,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             g.dispose();
 
             sel.setContent(copy);
-
-            ToolManager toolManager = ToolManager.getInstance();
-            ((SelectionTool) toolManager.getTool("Selection")).setNewSelection(sel);
-            toolManager.setActiveTool("Selection");
+            selectionManager.setSelection(sel);
 
             canvas.clearTempBuffer();
         }

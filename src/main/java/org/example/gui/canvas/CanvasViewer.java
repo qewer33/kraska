@@ -2,18 +2,24 @@ package org.example.gui.canvas;
 
 import org.example.app.tool.AbstractTool;
 import org.example.app.tool.ToolManager;
+import org.example.gui.canvas.selection.SelectionManager;
+import org.example.gui.canvas.selection.SelectionView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 
+/*
+ * CanvasViewer is a JScrollPane that wraps a Canvas and provides a zooming and panning functionality.
+ * It also displays a checkerboard pattern as the background and handles painting of overlays (e.g. selection).
+ */
 public class CanvasViewer extends JScrollPane {
     private final Canvas canvas;
     private double zoomFactor = 1.0;
     private Point panStartPoint;
     private Point viewStartPoint;
+
+    private final SelectionManager selectionManager = SelectionManager.getInstance();
 
     private final JLayeredPane layeredPane;
     private final OverlayPanel overlayPanel;
@@ -151,17 +157,25 @@ public class CanvasViewer extends JScrollPane {
         return canvas;
     }
 
+    // OverlayPanel handles painting of on canvas overlays (e.g. selection)
     private class OverlayPanel extends JPanel {
         @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
+
+            // Paint tool overlays
             AbstractTool activeTool = ToolManager.getInstance().getActiveTool();
             if (activeTool instanceof OverlayPainter painter) {
                 painter.paintOverlay((Graphics2D) g.create(), zoomFactor);
             }
+
+            // Paint selection overlay
+            SelectionView view = selectionManager.getView();
+            if (view.isActive()) view.paintOverlay((Graphics2D) g.create(), zoomFactor);
         }
     }
 
+    // CheckerboardPanel is a simple JPanel that displays a checkerboard pattern for the background
     private static class CheckerboardPanel extends JPanel {
         private static final int TILE_SIZE = 16;
         private static final Color COLOR1 = new Color(200, 200, 200);

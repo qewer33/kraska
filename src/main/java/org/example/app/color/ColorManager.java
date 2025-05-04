@@ -4,6 +4,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * ColorManager manages the primary and secondary color of the application.
+ * It is a manager class that uses the singleton pattern.
+ */
 public class ColorManager {
     private Color primary;
     private Color secondary;

@@ -234,7 +234,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
                 Paint oldPaint = g2d.getPaint();
 
                 g2d.translate(x, y);
-                g2d.rotate(Math.toRadians(45));
+                g2d.rotate(Math.toRadians(-75));
 
                 int width = size;
                 int height = Math.max(size / 4, 1);

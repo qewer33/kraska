@@ -2,6 +2,7 @@ package org.example.gui.canvas;
 
 import org.example.app.color.ColorManager;
 import org.example.app.tool.ToolManager;
+import org.example.gui.canvas.selection.SelectionManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,8 +18,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-
-
+/*
+ * Canvas is a JPanel that displays a canvas image and handles drawing operations.
+ * It is the base class of Kraska's painting engine.
+ */
 public class Canvas extends JPanel {
     private Dimension logicalSize = new Dimension(800, 600);
     private BufferedImage buffer;
@@ -29,10 +32,10 @@ public class Canvas extends JPanel {
     private boolean canvasChangedSinceLastSave = false;
     private final ScheduledExecutorService autosaveExecutor = Executors.newSingleThreadScheduledExecutor();
 
-
     // Managers
-    private final ColorManager colorManager;
-    private final ToolManager toolManager;
+    private final ColorManager colorManager = ColorManager.getInstance();
+    private final ToolManager toolManager = ToolManager.getInstance();
+    private final SelectionManager selectionManager = SelectionManager.getInstance();
 
     // State management
     private MouseEvent lastEvent;
@@ -40,9 +43,9 @@ public class Canvas extends JPanel {
     private final Stack<BufferedImage> undoStack = new Stack<>();
     private final Stack<BufferedImage> redoStack = new Stack<>();
 
+    public Canvas() {}
+
     public Canvas(int width, int height, Color backgroundColor) {
-        colorManager = ColorManager.getInstance();
-        toolManager = ToolManager.getInstance();
         this.logicalSize = new Dimension(width, height);
         autosaveExecutor.scheduleAtFixedRate(this::autoSave, 5, 5, TimeUnit.SECONDS);
         setPreferredSize(logicalSize);
@@ -50,11 +53,6 @@ public class Canvas extends JPanel {
         initializeCanvas(backgroundColor);
         setupMouseListeners();
         setOpaque(false);
-    }
-
-    public Canvas(){
-        colorManager = ColorManager.getInstance();
-        toolManager = ToolManager.getInstance();
     }
 
     private void initializeCanvas(Color backgroundColor) {
@@ -114,21 +112,28 @@ public class Canvas extends JPanel {
         isDrawing = true;
         lastEvent = e;
 
-        if (toolManager.getActiveTool() instanceof CanvasPainter) {
-            ((CanvasPainter) toolManager.getActiveTool()).onMousePress(this, e);
+        if (selectionManager.isActive()) selectionManager.getView().onMousePress(this, e);
+
+        if (!(selectionManager.restrictToolInput && selectionManager.isActive()) && toolManager.getActiveTool() instanceof CanvasPainter tool) {
+            tool.onMousePress(this, e);
         }
     }
 
     public void continueDrawing(MouseEvent e) {
-        if (isDrawing && toolManager.getActiveTool() instanceof CanvasPainter) {
-            ((CanvasPainter) toolManager.getActiveTool()).onMouseDrag(this, e);
+        if (selectionManager.isActive()) selectionManager.getView().onMouseDrag(this, e);
+
+        if (!(selectionManager.restrictToolInput && selectionManager.isActive()) && isDrawing && toolManager.getActiveTool() instanceof CanvasPainter tool) {
+            tool.onMouseDrag(this, e);
         }
     }
 
     public void finishDrawing() {
-        if (isDrawing && toolManager.getActiveTool() instanceof CanvasPainter) {
-            ((CanvasPainter) toolManager.getActiveTool()).onMouseRelease(this, lastEvent);
+        if (selectionManager.isActive()) selectionManager.getView().onMouseRelease(this, lastEvent);
+
+        if (!(selectionManager.restrictToolInput && selectionManager.isActive()) && isDrawing && toolManager.getActiveTool() instanceof CanvasPainter tool) {
+            tool.onMouseRelease(this, lastEvent);
         }
+
         isDrawing = false;
         lastEvent = null;
     }

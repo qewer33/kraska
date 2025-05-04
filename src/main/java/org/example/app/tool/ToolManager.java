@@ -3,6 +3,10 @@ package org.example.app.tool;
 import java.awt.*;
 import java.util.*;
 
+/*
+ * ToolManager manages the active tool and the list of available tools.
+ * It is a manager class that uses the singleton pattern.
+ */
 public class ToolManager {
     private final Map<String, AbstractTool> tools = new HashMap<>();
     private AbstractTool activeTool;
@@ -48,7 +52,9 @@ public class ToolManager {
         AbstractTool newTool = tools.get(toolName);
         if (newTool != null && newTool != activeTool) {
             AbstractTool oldTool = activeTool;
+            if (oldTool != null) oldTool.onDeactivate();
             activeTool = newTool;
+            activeTool.onActivate();
             notifyToolChanged(oldTool, newTool);
         }
     }

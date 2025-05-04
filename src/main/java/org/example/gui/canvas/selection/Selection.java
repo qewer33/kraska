@@ -1,4 +1,4 @@
-package org.example.gui.canvas;
+package org.example.gui.canvas.selection;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
