@@ -1,8 +1,15 @@
 package org.example.gui;
 
+import org.example.app.ActionManager;
+import org.example.app.tool.AbstractTool;
+import org.example.app.tool.ToolManager;
+
 import javax.swing.*;
+import java.awt.*;
 
 public class ApplicationMenu extends JMenuBar {
+    private final ToolManager toolManager = ToolManager.getInstance();
+    private final ActionManager actionManager = ActionManager.getInstance();
 
     public ApplicationMenu() {
         // File menu
@@ -39,13 +46,12 @@ public class ApplicationMenu extends JMenuBar {
         // Tools menu
         JMenu toolsMenu = new JMenu("Tools");
 
-        JMenuItem brush = new JMenuItem("Brush");
-        JMenuItem eraser = new JMenuItem("Eraser");
-        JMenuItem colorPicker = new JMenuItem("Color Picker");
-
-        toolsMenu.add(brush);
-        toolsMenu.add(eraser);
-        toolsMenu.add(colorPicker);
+        for (AbstractTool tool : toolManager.getTools()) {
+            JMenuItem item = new JMenuItem();
+            System.out.println(actionManager.getAction(tool.getName()));
+            item.setAction(actionManager.getAction(tool.getName()));
+            toolsMenu.add(item);
+        }
 
         // Help menu
         JMenu helpMenu = new JMenu("Help");

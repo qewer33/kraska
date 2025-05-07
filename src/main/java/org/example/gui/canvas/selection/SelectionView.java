@@ -11,13 +11,14 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /*
  * SelectionView manages the selection view and state.
  * It also handles the painting of the selection overlay.
  */
 public class SelectionView implements CanvasPainter, OverlayPainter {
-    private enum State {
+    public enum State {
         IDLE, CREATING, MOVING, SCALING, ROTATING
     }
     private enum ScaleHandle {
@@ -64,6 +65,7 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
             rotationAngle = 0;
             currentSelection = null;
             tempPaintOverlay = true;
+            System.out.println("Creating new selection");
         }
 
         canvas.repaint();
@@ -146,9 +148,7 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
 
     @Override
     public void onMouseRelease(org.example.gui.canvas.Canvas canvas, MouseEvent e) {
-        if (canvas.getUnzoomedPoint(e.getPoint()) == currentPoint) {
-            isActive = false;
-        } else if (currentState == State.CREATING && startPoint != null && currentPoint != null) {
+        if (currentState == State.CREATING && startPoint != null && currentPoint != null) {
             int x = Math.min(startPoint.x, currentPoint.x);
             int y = Math.min(startPoint.y, currentPoint.y);
             int w = Math.abs(startPoint.x - currentPoint.x);
@@ -189,16 +189,17 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
 
     @Override
     public void paintOverlay(Graphics2D g2d, double zoomFactor) {
+        // Draw the temporary live selection rectangle
         if (tempPaintOverlay) {
+            int x = (int) (Math.min(startPoint.x, currentPoint.x) * zoomFactor);
+            int y = (int) (Math.min(startPoint.y, currentPoint.y) * zoomFactor);
+            int w = (int) (Math.abs(startPoint.x - currentPoint.x) * zoomFactor);
+            int h = (int) (Math.abs(startPoint.y - currentPoint.y) * zoomFactor);
+
             Stroke oldStroke = g2d.getStroke();
             g2d.setColor(new Color(0, 120, 215));
-            g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1f, new float[]{4f, 4f}, 0));
-            g2d.drawRect(
-                    (int) (startPoint.x * zoomFactor),
-                    (int) (startPoint.y * zoomFactor),
-                    (int) ((currentPoint.x - startPoint.x) * zoomFactor),
-                    (int) ((currentPoint.y - startPoint.y) * zoomFactor)
-            );
+            g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1f, new float[]{12f, 6f, 4f, 6f}, 0));
+            g2d.drawRect(x, y, w, h);
             g2d.setStroke(oldStroke);
         }
         if (currentSelection == null) return;
@@ -214,14 +215,10 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
         Point bottomLeft = rotatePoint(rect.x, rect.y + rect.height, centerX, centerY, rotationAngle);
 
         // Scale points for zoom
-        topLeft.x *= (int) zoomFactor;
-        topLeft.y *= (int) zoomFactor;
-        topRight.x *= (int) zoomFactor;
-        topRight.y *= (int) zoomFactor;
-        bottomRight.x *= (int) zoomFactor;
-        bottomRight.y *= (int) zoomFactor;
-        bottomLeft.x *= (int) zoomFactor;
-        bottomLeft.y *= (int) zoomFactor;
+        for (Point point : Arrays.asList(topLeft, topRight, bottomRight, bottomLeft)) {
+            point.x *= zoomFactor;
+            point.y *= zoomFactor;
+        }
 
         // --- Draw selected content (rotated)
         if (currentSelection.getContent() != null) {
@@ -256,11 +253,11 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
 
         Stroke oldStroke = g2d.getStroke();
         g2d.setColor(new Color(0, 120, 215));
-        g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1f, new float[]{4f, 4f}, 0));
+        g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1f, new float[]{12f, 6f, 4f, 6f}, 0));
         g2d.draw(path);
-        g2d.setStroke(oldStroke);
 
         // --- Draw corner handles
+        g2d.setStroke(new BasicStroke(2f));
         drawHandle(g2d, topLeft);
         drawHandle(g2d, topRight);
         drawHandle(g2d, bottomRight);
@@ -286,6 +283,7 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
         g2d.setColor(Color.BLACK);
         g2d.drawOval(handleX - ROTATION_HANDLE_RADIUS, handleY - ROTATION_HANDLE_RADIUS,
                 ROTATION_HANDLE_RADIUS * 2, ROTATION_HANDLE_RADIUS * 2);
+        g2d.setStroke(oldStroke);
     }
 
     public void applySelection(Canvas canvas) {
@@ -421,5 +419,9 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
 
     public boolean getCopy() {
         return copy;
+    }
+
+    public void setCurrentState(State state) {
+        currentState = state;
     }
 }

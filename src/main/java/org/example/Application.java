@@ -1,7 +1,11 @@
 package org.example;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import org.example.app.ActionManager;
+import org.example.app.color.ColorManager;
+import org.example.app.tool.ToolManager;
 import org.example.gui.ApplicationMenu;
 import org.example.gui.screen.DashboardScreen;
 import org.example.gui.canvas.Canvas;
@@ -13,6 +17,7 @@ import java.awt.event.WindowEvent;
 
 public class Application {
     public void run() {
+        instanciateManagers();
         setupTheme();
 
         SwingUtilities.invokeLater(() -> {
@@ -20,6 +25,12 @@ public class Application {
             JFrame mainWindow = createMainWindow(canvas);
             mainWindow.setVisible(true);
         });
+    }
+
+    private void instanciateManagers() {
+        ActionManager.getInstance();
+        ColorManager.getInstance();
+        ToolManager.getInstance();
     }
 
     private void setupTheme() {

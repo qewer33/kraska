@@ -30,6 +30,7 @@ public class SelectionManager {
     public void setSelection(Selection selection) {
         view.setNewSelection(selection);
         view.setActive(true);
+        view.setCurrentState(SelectionView.State.IDLE);
     }
 
     public void setView(SelectionView view) {

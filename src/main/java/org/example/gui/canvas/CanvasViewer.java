@@ -164,14 +164,16 @@ public class CanvasViewer extends JScrollPane {
             super.paintComponent(g);
 
             // Paint tool overlays
+            /*
             AbstractTool activeTool = ToolManager.getInstance().getActiveTool();
             if (activeTool instanceof OverlayPainter painter) {
-                painter.paintOverlay((Graphics2D) g.create(), zoomFactor);
+                painter.paintOverlay((Graphics2D) g.create(), canvas.getZoomFactor());
             }
+             */
 
             // Paint selection overlay
             SelectionView view = selectionManager.getView();
-            if (view.isActive()) view.paintOverlay((Graphics2D) g.create(), zoomFactor);
+            if (view.isActive()) view.paintOverlay((Graphics2D) g.create(), canvas.getZoomFactor());
         }
     }
 

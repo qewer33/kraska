@@ -21,7 +21,7 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
 
 
     public TextTool() {
-        super("Text Tool");
+        super("Text");
         this.colorManager = ColorManager.getInstance();
         this.color = colorManager.getPrimary();
     }
