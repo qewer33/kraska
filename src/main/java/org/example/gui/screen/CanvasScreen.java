@@ -1,6 +1,7 @@
 package org.example.gui.screen;
 
 import org.example.app.color.ColorManager;
+import org.example.app.file.AppFile;
 import org.example.app.tool.BrushTool;
 import org.example.app.tool.ColorPickerTool;
 import org.example.app.tool.ToolManager;
@@ -22,6 +23,9 @@ public class CanvasScreen extends AbstractScreen {
     public CanvasScreen(int width, int height, Color backgroundColor) {
         this.canvas = new Canvas(width, height, backgroundColor);
         this.viewer = new CanvasViewer(this.canvas);
+
+        AppFile.setInstance(new AppFile(this.canvas));
+
         ApplicationStatusBar statusBar = new ApplicationStatusBar(this.viewer);
         CanvasToolbar toolbar = new CanvasToolbar();
         CanvasFileOperationsBar fileOperationsBar = new CanvasFileOperationsBar(this.canvas);

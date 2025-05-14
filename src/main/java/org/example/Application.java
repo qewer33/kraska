@@ -2,6 +2,7 @@ package org.example;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import org.example.app.file.AppFile;
 import org.example.gui.ApplicationMenu;
 import org.example.gui.screen.DashboardScreen;
 

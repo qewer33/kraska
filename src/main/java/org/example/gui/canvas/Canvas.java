@@ -284,4 +284,8 @@ public class Canvas extends JPanel {
     public void setTempBuffer(BufferedImage tempBuffer) {
         this.tempBuffer = tempBuffer;
     }
+
+    public void setImage(BufferedImage buffer){this.buffer = buffer;}
+
+    public BufferedImage getImage() {return buffer;}
 }

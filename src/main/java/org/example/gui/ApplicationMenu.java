@@ -1,5 +1,7 @@
 package org.example.gui;
 
+import org.example.app.file.AppFile;
+
 import javax.swing.*;
 
 public class ApplicationMenu extends JMenuBar {
@@ -69,16 +71,23 @@ public class ApplicationMenu extends JMenuBar {
 
         // The things happening when you click the things
         newFile.addActionListener(e -> {
-            System.out.println("Congrats! You've just pushed the fucking new button!");
+            JOptionPane.showMessageDialog(null, "We didn't code it yet");
         });
 
         openFile.addActionListener(e -> {
-            System.out.println("Ow! You've decided to open an already exist file. Dumb mf");
+            JFileChooser chooser = new JFileChooser();
+            int result = chooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION){
+                AppFile.getInstance().open(chooser.getSelectedFile());
+            }
         });
 
         saveFile.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null,
-                    "Wow so fucking quickly! What did you draw huh, Aleksei's dick or smth?");
+            JFileChooser chooser = new JFileChooser();
+            int result = chooser.showSaveDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                AppFile.getInstance().save(chooser.getSelectedFile());
+            }
         });
 
 
