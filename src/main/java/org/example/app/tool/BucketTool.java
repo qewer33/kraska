@@ -12,7 +12,7 @@ import org.example.gui.canvas.CanvasPainter;
 
 
 
-public class BucketTool extends AbstractTool implements CanvasPainter, ToolOptionsProvider {
+public class BucketTool extends AbstractTool implements CanvasPainter {
     private ColorManager colorManager;
     private Color color;
 
@@ -56,14 +56,6 @@ public class BucketTool extends AbstractTool implements CanvasPainter, ToolOptio
         g2d.dispose();
         canvas.repaint();
     }
-
-    @Override
-    public JPanel getToolOptionsPanel(){
-        JPanel panel = new JPanel();
-        return panel ;
-    }
-
-
 
     @Override
     public void onMousePress(Canvas canvas, MouseEvent e) {

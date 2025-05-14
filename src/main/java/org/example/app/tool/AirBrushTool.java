@@ -3,6 +3,7 @@ package org.example.app.tool;
 import org.example.app.color.ColorManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
+import org.example.gui.screen.component.ToolOptionsPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,9 +61,6 @@ public class AirBrushTool extends AbstractTool implements CanvasPainter, ToolOpt
         canvas.repaint();
     }
 
-
-
-
     // Color blending function
     private Color blendColors(Color base, Color blend, float opacity) {
         int red = (int) (base.getRed() * (1 - opacity) + blend.getRed() * opacity);
@@ -75,8 +73,7 @@ public class AirBrushTool extends AbstractTool implements CanvasPainter, ToolOpt
     // Create and return a panel with tool options
     @Override
     public JPanel getToolOptionsPanel(){
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        ToolOptionsPanel panel = new ToolOptionsPanel();
 
         JLabel sizeLabel = new JLabel("Size: " + radius + "px");
         JSlider sizeSlider = new JSlider(1, 100, radius);
@@ -96,15 +93,11 @@ public class AirBrushTool extends AbstractTool implements CanvasPainter, ToolOpt
             densityLabel.setText("Density: " + density);
         });
 
-        panel.add(sizeLabel);
-        panel.add(sizeSlider);
-        panel.add(densityLabel);
-        panel.add(densitySlider);
+        panel.addComponentGroup(new JComponent[]{sizeLabel, sizeSlider});
+        panel.addComponentGroup(new JComponent[]{densityLabel, densitySlider});
 
         return panel;
     }
-
-
 
     @Override
     public void onMousePress(Canvas canvas, MouseEvent e) {

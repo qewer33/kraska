@@ -1,15 +1,28 @@
 package org.example.app.tool;
 
+import org.example.app.Util;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
+import org.example.gui.screen.component.ToolOptionsPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class EraserTool extends AbstractTool implements CanvasPainter, ToolOptionsProvider {
+    private enum EraserShape {
+        BASIC,
+        SHARP,
+        SOFT
+    }
+
     private Point lastPoint;
+
+    private EraserShape eraserShape = EraserShape.BASIC;
     private int size;
     private boolean antialiased;
     private float force; // New: 0.0 (weak) to 1.0 (full erase)
@@ -45,21 +58,44 @@ public class EraserTool extends AbstractTool implements CanvasPainter, ToolOptio
         }
     }
 
-    @Override
     public JPanel getToolOptionsPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        ToolOptionsPanel panel = new ToolOptionsPanel();
 
-        // Size slider
+        JLabel eraserTypeLabel = new JLabel("Eraser: " + Util.getDisplayName(eraserShape.name()));
+        JPanel brushShapePanel = new JPanel(new GridLayout(1, 4, 5, 5));
+        ButtonGroup brushShapeGroup = new ButtonGroup();
+
+        HashMap<EraserShape, ImageIcon> eraserIcons = new HashMap<>();
+        eraserIcons.put(EraserShape.BASIC, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/eraser/eraser_basic.png"))));
+        eraserIcons.put(EraserShape.SHARP, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/eraser/eraser_sharp.png"))));
+        eraserIcons.put(EraserShape.SOFT, new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/eraser/eraser_soft.png"))));
+
+        for (EraserShape shape : EraserShape.values()) {
+            JToggleButton button = new JToggleButton(eraserIcons.get(shape));
+            button.addActionListener(e -> {
+                eraserShape = shape;
+                eraserTypeLabel.setText("Eraser: " + Util.getDisplayName(eraserShape.name()));
+            });
+            brushShapeGroup.add(button);
+            brushShapePanel.add(button);
+
+            // Select default active button
+            if (shape == eraserShape) {
+                button.setSelected(true);
+            }
+        }
+
+        // Hacky layout fix to make icons square
+        JToggleButton spacerButton = new JToggleButton();
+        spacerButton.setVisible(false);
+        brushShapePanel.add(spacerButton);
+
         JLabel sizeLabel = new JLabel("Size: " + size + "px");
         JSlider sizeSlider = new JSlider(1, 100, size);
         sizeSlider.addChangeListener(e -> {
             size = sizeSlider.getValue();
             sizeLabel.setText("Size: " + size + "px");
         });
-
-        panel.add(sizeLabel);
-        panel.add(sizeSlider);
 
         // Force slider (transparency strength)
         JLabel forceLabel = new JLabel("Force: " + (int)(force * 100) + "%");
@@ -69,65 +105,74 @@ public class EraserTool extends AbstractTool implements CanvasPainter, ToolOptio
             forceLabel.setText("Force: " + forceSlider.getValue() + "%");
         });
 
-        panel.add(forceLabel);
-        panel.add(forceSlider);
-
-        // Antialias checkbox
         JCheckBox antialiasCheckbox = new JCheckBox("Antialiasing");
         antialiasCheckbox.setSelected(antialiased);
         antialiasCheckbox.addItemListener(e -> {
             antialiased = antialiasCheckbox.isSelected();
         });
-        panel.add(antialiasCheckbox);
+
+        panel.addComponentGroup(new JComponent[]{eraserTypeLabel, brushShapePanel});
+        panel.addComponentGroup(new JComponent[]{sizeLabel, sizeSlider});
+        panel.addComponentGroup(new JComponent[]{forceLabel, forceSlider});
+        panel.addComponent(antialiasCheckbox);
 
         return panel;
     }
 
     private void erase(Canvas canvas, Point from, Point to) {
         BufferedImage canvasImage = canvas.getCanvasImage();
-
         Graphics2D g2d = canvasImage.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                this.antialiased ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
-        g2d.setStroke(new BasicStroke(size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2d.dispose(); // we will not draw anything directly!
 
-        // Calculate the bounding rectangle
-        int minX = Math.min(from.x, to.x) - size / 2;
-        int minY = Math.min(from.y, to.y) - size / 2;
-        int maxX = Math.max(from.x, to.x) + size / 2;
-        int maxY = Math.max(from.y, to.y) + size / 2;
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, force));
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, antialiased ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        // Clamp to canvas bounds
-        minX = Math.max(0, minX);
-        minY = Math.max(0, minY);
-        maxX = Math.min(canvasImage.getWidth() - 1, maxX);
-        maxY = Math.min(canvasImage.getHeight() - 1, maxY);
+        int steps = (int) from.distance(to) * 2;
+        if (steps == 0) steps = 1;
 
-        // Loop over the pixels inside the affected area
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                // Check if pixel is within the eraser circle
-                double dist = from.distance(x, y);
-                if (dist <= size / 2.0) {
-                    int rgba = canvasImage.getRGB(x, y);
-                    int alpha = (rgba >> 24) & 0xFF;
-                    int red = (rgba >> 16) & 0xFF;
-                    int green = (rgba >> 8) & 0xFF;
-                    int blue = rgba & 0xFF;
+        for (int i = 0; i <= steps; i++) {
+            double t = (double) i / steps;
+            int x = (int) (from.x + (to.x - from.x) * t);
+            int y = (int) (from.y + (to.y - from.y) * t);
 
-                    // Calculate new alpha
-                    int newAlpha = (int)(alpha * (1.0f - force));
-                    if (newAlpha < 0) newAlpha = 0;
-
-                    // Write pixel back
-                    int newRGBA = (newAlpha << 24) | (red << 16) | (green << 8) | blue;
-                    canvasImage.setRGB(x, y, newRGBA);
-                }
-            }
+            drawEraserStamp(g2d, x, y);
         }
 
+        g2d.dispose();
         canvas.repaint();
+    }
+
+    private void drawEraserStamp(Graphics2D g2d, int x, int y) {
+        switch (eraserShape) {
+            case BASIC -> g2d.fillOval(x - size / 2, y - size / 2, size, size);
+            case SHARP -> {
+                int width = size;
+                int height = Math.max(size / 6, 1);
+
+                AffineTransform old = g2d.getTransform();
+                g2d.translate(x, y);
+                g2d.rotate(Math.toRadians(45));
+                g2d.fillRect(-width / 2, -height / 2, width, height);
+                g2d.setTransform(old);
+            }
+            case SOFT -> {
+                RadialGradientPaint gradient = new RadialGradientPaint(
+                        new Point(x, y),
+                        size / 2f,
+                        new float[] {0f, 0.15f, 0.2f, 1f},
+                        new Color[] {
+                                new Color(0, 0, 0, (int) (force*100)),
+                                new Color(0, 0, 0, (int) (force*80)),
+                                new Color(0, 0, 0, (int) (force*10)),
+                                new Color(0, 0, 0, 0)
+                        }
+                );
+
+                Paint oldPaint = g2d.getPaint();
+                g2d.setPaint(gradient);
+                g2d.fillOval(x - size / 2, y - size / 2, size, size);
+                g2d.setPaint(oldPaint);
+            }
+        }
     }
 
     public int getSize() {

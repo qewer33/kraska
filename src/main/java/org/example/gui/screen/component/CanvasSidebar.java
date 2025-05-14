@@ -11,39 +11,41 @@ import java.util.Objects;
 
 public class CanvasSidebar extends JPanel {
     private final JPanel toolOptionsContainer;
-    private final JLabel titleLabel;
+    private final JLabel toolOptionsLabel;
     private final ColorManager colorManager = ColorManager.getInstance();
 
     public CanvasSidebar() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BorderLayout());
         setPreferredSize(new Dimension(250, 0));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+
+        ToolOptionsPanel panel = new ToolOptionsPanel();
 
         // === Color Section ===
         JLabel colorLabel = new JLabel("Colors");
+        colorLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
         colorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        add(colorLabel);
 
         JPanel colorPanel = new JPanel();
         colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.Y_AXIS));
         JPanel colorButtons = createColorButtonsPanel();
-        colorPanel.add(colorButtons);
-        add(colorPanel);
 
-        add(Box.createVerticalStrut(20)); // spacing
+        JPanel palette = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        palette.setOpaque(false);
+        palette.setBorder(BorderFactory.createEmptyBorder(5, 15, 0, 0));
+        palette.add(new ColorPalette());
 
         // === Tool Options Section ===
-        titleLabel = new JLabel("Tool Options");
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        add(titleLabel);
+        toolOptionsLabel = new JLabel("Tool Options");
+        toolOptionsLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        toolOptionsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        toolOptionsContainer = new JPanel();
-        toolOptionsContainer.setLayout(new BoxLayout(toolOptionsContainer, BoxLayout.Y_AXIS));
-        toolOptionsContainer.setAlignmentX(Component.LEFT_ALIGNMENT);
-        toolOptionsContainer.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
-        add(toolOptionsContainer);
+        toolOptionsContainer = new ToolOptionsPanel();
 
-        add(Box.createVerticalGlue()); // push everything up
+        panel.addComponentGroup(new JComponent[]{colorLabel, colorButtons, palette}, 0);
+        panel.addComponentGroup(new JComponent[]{toolOptionsLabel, toolOptionsContainer}, 30);
+
+        add(panel, BorderLayout.NORTH);
     }
 
     private JPanel createColorButtonsPanel() {
@@ -90,35 +92,28 @@ public class CanvasSidebar extends JPanel {
             colorManager.swap();
         });
 
-        colorButtonsPanel.add(Box.createHorizontalStrut(45));
+        colorButtonsPanel.add(Box.createHorizontalStrut(35));
         colorButtonsPanel.add(primaryColorBtn);
         colorButtonsPanel.add(swapBtn);
         colorButtonsPanel.add(secondaryColorBtn);
-
-        colorButtonsPanel.add(Box.createVerticalStrut(10));
-
-        JPanel paletteWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        paletteWrapper.setOpaque(false);
-
-        paletteWrapper.setBorder(BorderFactory.createEmptyBorder(25, 25, 0, 0));
-
-        paletteWrapper.add(new ColorPalette());   // new sexy palette oye
-
-        colorButtonsPanel.add(paletteWrapper);
 
         return colorButtonsPanel;
     }
 
     public void updateToolOptions(AbstractTool tool) {
-        titleLabel.setText(tool.getName() + " Options");
+        toolOptionsLabel.setText(tool.getName() + " Options");
 
         toolOptionsContainer.removeAll();
 
         if (tool instanceof ToolOptionsProvider provider) {
             JPanel optionsPanel = provider.getToolOptionsPanel();
             toolOptionsContainer.add(optionsPanel);
+            setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10)); // Reset fix
         } else {
-            toolOptionsContainer.add(new JLabel("No options available."));
+            ToolOptionsPanel panel = new ToolOptionsPanel();
+            panel.addComponent(new JLabel("No options available."));
+            toolOptionsContainer.add(panel);
+            setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 10)); // Hacky fix to prevent sidebar from moving
         }
 
         toolOptionsContainer.revalidate();
