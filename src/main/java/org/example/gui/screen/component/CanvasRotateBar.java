@@ -64,7 +64,7 @@ public class CanvasRotateBar extends JToolBar {
         int newWidth = (int) Math.floor(w * cos + h * sin);
         int newHeight = (int) Math.floor(h * cos + w * sin);
 
-        BufferedImage rotated = new BufferedImage(newWidth, newHeight, image.getType());
+        BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = rotated.createGraphics();
 
         // Center the image and apply rotation

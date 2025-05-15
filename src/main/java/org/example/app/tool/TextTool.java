@@ -18,6 +18,7 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
     private boolean isBold = false;
     private boolean isItalic = false;
     private JTextField activeTextField = null;
+    Point point;
 
 
     public TextTool() {
@@ -65,23 +66,55 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
 
     @Override
     public void onMousePress(Canvas canvas, MouseEvent e) {
-        if (activeTextField != null) return; // Zaten bir yazı kutusu açık, yenisini oluşturma
+
+        if (activeTextField != null) return;
         if (e.getButton() != MouseEvent.BUTTON1 && e.getButton() != MouseEvent.BUTTON3) return;
 
         this.color = e.getButton() == MouseEvent.BUTTON1 ? colorManager.getPrimary() : colorManager.getSecondary();
-        Point point = canvas.getUnzoomedPoint(e.getPoint());
 
+        Point zoomedPoint = e.getPoint();
+        point = canvas.getUnzoomedPoint(zoomedPoint);
         activeTextField = new JTextField();
-        activeTextField.setFont(new Font(fontName, (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0), fontSize));
+        activeTextField.setFont(new Font(fontName, (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0), (int) (fontSize*canvas.getZoomFactor())));
         activeTextField.setForeground(color);
-        activeTextField.setBounds(point.x, point.y, 200, fontSize + 10);
+        activeTextField.setOpaque(false);
+        activeTextField.setBackground(new Color(0, 0, 0, 0));
+        activeTextField.setBorder(null);
+        activeTextField.setBounds(zoomedPoint.x, zoomedPoint.y, 200, (int)((fontSize + 10)*canvas.getZoomFactor()));
+        activeTextField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateWidth(canvas); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateWidth(canvas); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateWidth(canvas); }
+        });
+        activeTextField.addFocusListener(new java.awt.event.FocusListener() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {}
+
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                String userText = activeTextField.getText();
+                canvas.remove(activeTextField);
+                canvas.repaint();
+                if (!userText.isEmpty()) {
+                    drawText(canvas, point.x, point.y + fontSize, userText);
+                }
+                activeTextField = null;
+            }
+        });
+
+        canvas.addPropertyChangeListener("zoomFactor", evt -> {
+            activeTextField.setFont(new Font(fontName, (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0), (int) (fontSize*canvas.getZoomFactor())));
+            updateWidth(canvas);
+        });
 
         canvas.setLayout(null);
         canvas.add(activeTextField);
         canvas.repaint();
         activeTextField.requestFocus();
 
-        // Enter'a basıldığında yazıyı çiz ve alanı temizle
         activeTextField.addActionListener(ev -> {
             String userText = activeTextField.getText();
             canvas.remove(activeTextField);
@@ -89,8 +122,20 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
             if (!userText.isEmpty()) {
                 drawText(canvas, point.x, point.y + fontSize, userText);
             }
-            activeTextField = null; // Yeni kutu açılabilsin
+            activeTextField = null;
         });
+    }
+
+    private void updateWidth(Canvas canvas) {
+        FontMetrics fm = activeTextField.getFontMetrics(activeTextField.getFont());
+        int textWidth = fm.stringWidth(activeTextField.getText());
+        activeTextField.setBounds(
+                (int)(point.getX()*canvas.getZoomFactor()),
+                (int)(point.getY()*canvas.getZoomFactor()),
+                Math.max(50, textWidth + 20),
+                (int)((fontSize + 10)*canvas.getZoomFactor())
+        );
+        canvas.repaint();
     }
 
     // Draw the specified text at the given position
