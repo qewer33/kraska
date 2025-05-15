@@ -364,7 +364,10 @@ public class Canvas extends JPanel {
     public void setCanvasImage(BufferedImage newImage) {
         this.buffer = newImage;
         this.logicalSize = new Dimension(newImage.getWidth(), newImage.getHeight());
-        setSize(getPreferredSize());
+        this.tempBuffer = new BufferedImage(
+                newImage.getWidth(), newImage.getHeight(), BufferedImage.TYPE_INT_ARGB
+        );
+        setPreferredSize(getPreferredSize());
         revalidate();
         repaint();
     }
@@ -374,8 +377,11 @@ public class Canvas extends JPanel {
     }
 
     public void setZoomFactor(double zoomFactor) {
+        double oldValue = this.zoomFactor;
         this.zoomFactor = zoomFactor;
         repaint();
+
+        this.firePropertyChange("zoomFactor", oldValue, zoomFactor);
     }
 
     public double getZoomFactor() {
