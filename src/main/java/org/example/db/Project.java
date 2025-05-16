@@ -1,18 +1,16 @@
 package org.example.db;
 
-import java.time.LocalDateTime;
-
 public class Project {
     private final String name;
     private final String fileAddress;
-    private final LocalDateTime created;
-    private LocalDateTime lastUpdated;
+    private final String created;
+    private String lastOpened;
 
-    public Project(String name, String fileAddress, LocalDateTime created, LocalDateTime lastUpdated) {
+    public Project(String name, String fileAddress, String created, String lastOpened) {
         this.name = name;
         this.fileAddress = fileAddress;
         this.created = created;
-        this.lastUpdated = lastUpdated;
+        this.lastOpened = lastOpened;
     }
 
     public String getName() {
@@ -23,15 +21,15 @@ public class Project {
         return fileAddress;
     }
 
-    public LocalDateTime getCreated() {
+    public String getCreated() {
         return created;
     }
 
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
+    public String getLastOpened() {
+        return lastOpened;
     }
 
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
+    public void setLastOpened(String lastOpened) {
+        this.lastOpened = lastOpened;
     }
 }

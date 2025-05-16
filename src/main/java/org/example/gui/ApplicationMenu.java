@@ -50,7 +50,7 @@ public class ApplicationMenu extends JMenuBar {
 
         for (AbstractTool tool : toolManager.getTools()) {
             JMenuItem item = new JMenuItem();
-            System.out.println(actionManager.getAction(tool.getName()));
+            // System.out.println(actionManager.getAction(tool.getName()));
             item.setAction(actionManager.getAction(tool.getName()));
             toolsMenu.add(item);
         }

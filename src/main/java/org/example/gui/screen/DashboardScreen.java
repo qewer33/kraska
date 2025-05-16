@@ -57,7 +57,7 @@ public class DashboardScreen extends AbstractScreen {
 
     private void loadProjects() {
         // Fetch projects from the local database
-        List<Project> projects = ProjectDatabase.getInstance().getAllProjects();
+        List<Project> projects = ProjectDatabase.getInstance().getProjects();
 
         // Populate the table
         for (Project project : projects) {
@@ -65,7 +65,7 @@ public class DashboardScreen extends AbstractScreen {
                     project.getName(),
                     project.getFileAddress(),
                     project.getCreated(),
-                    project.getLastUpdated(),
+                    project.getLastOpened(),
                     "Load" // Button label
             });
         }
