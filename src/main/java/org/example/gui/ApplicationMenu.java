@@ -20,10 +20,12 @@ public class ApplicationMenu extends JMenuBar {
         JMenuItem newFile = new JMenuItem("New");
         JMenuItem openFile = new JMenuItem("Open");
         JMenuItem saveFile = new JMenuItem("Save");
+        JMenuItem saveAsFile = new JMenuItem("Save As..");
 
         fileMenu.add(newFile);
         fileMenu.add(openFile);
         fileMenu.add(saveFile);
+        fileMenu.add(saveAsFile);
 
         // Edit menu
         JMenu editMenu = new JMenu("Edit");
@@ -82,18 +84,29 @@ public class ApplicationMenu extends JMenuBar {
 
         openFile.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
+
+            // Her şey de gözükmesin
+            javax.swing.filechooser.FileNameExtensionFilter imageFilter =
+                    new javax.swing.filechooser.FileNameExtensionFilter(
+                            "Image Files (*.png, *.jpg, *.jpeg, *.bmp, *.gif)",
+                            "png", "jpg", "jpeg", "bmp", "gif");
+
+            chooser.setFileFilter(imageFilter);
+            chooser.setAcceptAllFileFilterUsed(false);
+
             int result = chooser.showOpenDialog(null);
-            if (result == JFileChooser.APPROVE_OPTION){
+            if (result == JFileChooser.APPROVE_OPTION) {
                 AppFile.getInstance().open(chooser.getSelectedFile());
             }
         });
 
         saveFile.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            int result = chooser.showSaveDialog(null);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                AppFile.getInstance().save(chooser.getSelectedFile());
-            }
+            AppFile.getInstance().save();
+        });
+
+
+        saveAsFile.addActionListener(e -> {
+           AppFile.getInstance().saveAs();
         });
 
 
