@@ -1,5 +1,6 @@
 package org.example.gui.screen.component;
 
+import org.example.app.file.AppFile;
 import org.example.gui.canvas.Canvas;
 
 import javax.swing.*;
@@ -30,7 +31,9 @@ public class CanvasFileOperationsBar extends JToolBar {
         JButton redoButton = new JButton(redoIcon);
         redoButton.addActionListener(e->canvas.redo());
         JButton saveButton = new JButton(saveIcon);
+        saveButton.addActionListener(e -> AppFile.getInstance().save());
         JButton saveAsButton = new JButton(saveAsIcon);
+        saveAsButton.addActionListener(e -> AppFile.getInstance().saveAs());
         JButton exportButton = new JButton(exportIcon);
 
         // Add buttons
