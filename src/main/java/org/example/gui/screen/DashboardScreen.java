@@ -225,8 +225,17 @@ public class DashboardScreen extends AbstractScreen {
             if (isPushed) {
                 int row = projectTable.getSelectedRow();
                 String projectName = (String) tableModel.getValueAt(row, 0);
-                JOptionPane.showMessageDialog(parentFrame, "Loading project: " + projectName);
-                // Logic to load the project can be added here
+                // Optionally, get other info if needed
+
+                // Remove dashboard and show CanvasScreen for this project
+                parentFrame.getContentPane().removeAll();
+                // You can fetch width, height, and backgroundColor from your DB if you store them, or use defaults
+                CanvasScreen canvasScreen = new CanvasScreen(800, 600, Color.WHITE, projectName);
+                // Load the latest autosave for this project
+                canvasScreen.getCanvas().loadLatestAutoSave(projectName);
+                parentFrame.getContentPane().add(canvasScreen);
+                parentFrame.revalidate();
+                parentFrame.repaint();
             }
             isPushed = false;
             return label;

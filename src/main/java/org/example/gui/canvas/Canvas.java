@@ -206,18 +206,15 @@ public class Canvas extends JPanel {
 
     // Load the latest autosave file if it exists
     public void loadLatestAutoSave(String projectName) {
-        // Main saves directory (e.g., in user home)
         String savesRoot = System.getProperty("user.home") + File.separator + "kraska_saves";
         String safeProjectName = projectName.replaceAll("[^a-zA-Z0-9\\-_]", "_");
         File projectDir = new File(savesRoot, safeProjectName);
 
         if (!projectDir.exists()) return;
 
-        // Get all .png files in the project autosave directory
         File[] files = projectDir.listFiles((dir, name) -> name.endsWith(".png"));
         if (files == null || files.length == 0) return;
 
-        // Find the most recently modified file
         File latest = Arrays.stream(files)
                 .max(Comparator.comparingLong(File::lastModified))
                 .orElse(null);
@@ -230,7 +227,6 @@ public class Canvas extends JPanel {
                     g2d.drawImage(loadedImage, 0, 0, null);
                     g2d.dispose();
                     repaint();
-                    System.out.println("Auto-saved canvas loaded from: " + latest.getAbsolutePath());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
