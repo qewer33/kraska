@@ -220,32 +220,32 @@ public class Canvas extends JPanel {
                 .orElse(null);
 
         // If a valid autosave file is found, prompt the user to load it
-        if (latest != null) {
-            int response = JOptionPane.showConfirmDialog(
-                    this,
-                    "Would you like to load the most recent autosave?",
-                    "Autosave Found",
-                    JOptionPane.YES_NO_OPTION
-            );
+        // if (latest != null) {
+        //     int response = JOptionPane.showConfirmDialog(
+        //             this,
+        //             "Would you like to load the most recent autosave?",
+        //             "Autosave Found",
+        //             JOptionPane.YES_NO_OPTION
+        //     );
 
-            // If user selects "Yes", load the autosave file
-            if (response != JOptionPane.YES_OPTION) return;
+        //     // If user selects "Yes", load the autosave file
+        //     if (response != JOptionPane.YES_OPTION) return;
 
-            try {
-                // Read the latest autosave file into a BufferedImage
-                BufferedImage loadedImage = ImageIO.read(latest);
-                if (loadedImage != null) {
-                    // Draw the loaded image onto the buffer (canvas)
-                    Graphics2D g2d = buffer.createGraphics();
-                    g2d.drawImage(loadedImage, 0, 0, null);
-                    g2d.dispose();
-                    repaint();
-                    System.out.println("Auto-saved canvas loaded from: " + latest.getAbsolutePath());
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        //     try {
+        //         // Read the latest autosave file into a BufferedImage
+        //         BufferedImage loadedImage = ImageIO.read(latest);
+        //         if (loadedImage != null) {
+        //             // Draw the loaded image onto the buffer (canvas)
+        //             Graphics2D g2d = buffer.createGraphics();
+        //             g2d.drawImage(loadedImage, 0, 0, null);
+        //             g2d.dispose();
+        //             repaint();
+        //             System.out.println("Auto-saved canvas loaded from: " + latest.getAbsolutePath());
+        //         }
+        //     } catch (IOException e) {
+        //         e.printStackTrace();
+        //     }
+        // }
     }
 
     public void undo() {

@@ -4,12 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ProjectDatabase {
-    private final ArrayList<Project> projects;
+    private ArrayList<Project> projects;
     private static ProjectDatabase instance;
 
     private ProjectDatabase() {
         DatabaseManager.connectAndInitialize();
         projects = DatabaseManager.getAllProjects();
+        // DatabaseManager.addProject(new Project("dermo", "C:/Projects/Canvas1.kraska", LocalDateTime.now().minusDays(1).toString(), LocalDateTime.now().toString()));
     }
 
     public static ProjectDatabase getInstance() {
@@ -25,5 +26,6 @@ public class ProjectDatabase {
 
     public void addProject(Project project) {
         projects.add(project);
+        DatabaseManager.addProject(project);
     }
 }
