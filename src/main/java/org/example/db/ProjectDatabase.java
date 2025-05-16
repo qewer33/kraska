@@ -28,4 +28,13 @@ public class ProjectDatabase {
         projects.add(project);
         DatabaseManager.addProject(project);
     }
+
+    // public void removeProject(Project project) {
+    //     projects.remove(project);
+    //     DatabaseManager.removeProject(project);
+    // }
+
+    public void updateLastOpened(String projectName, String newLastOpened) {
+        DatabaseManager.updateLastOpened(projectName, newLastOpened);
+    }
 }

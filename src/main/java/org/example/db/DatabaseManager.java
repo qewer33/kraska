@@ -68,6 +68,17 @@ public class DatabaseManager {
         }
     }
 
+    public static void updateLastOpened(String projectName, String newLastOpened) {
+        String sql = "UPDATE projects SET last_opened_time = ? WHERE name = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newLastOpened);
+            pstmt.setString(2, projectName);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error while updating last opened time: " + e.getMessage());
+        }
+    }
+
     public static void closeConnection() {
         try {
             if (conn != null) {
