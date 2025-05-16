@@ -45,25 +45,25 @@ public class Canvas extends JPanel {
 
     public Canvas() {}
 
-    public Canvas(int width, int height, Color backgroundColor) {
+    public Canvas(int width, int height, Color backgroundColor, String projectName) {
         this.logicalSize = new Dimension(width, height);
-        autosaveExecutor.scheduleAtFixedRate(this::autoSave, 5, 5, TimeUnit.SECONDS);
+        autosaveExecutor.scheduleAtFixedRate(() -> autoSave(projectName), 5, 5, TimeUnit.SECONDS);
         setPreferredSize(logicalSize);
-        setBackground(backgroundColor); // Set the background color
-        initializeCanvas(backgroundColor);
+        setBackground(backgroundColor);
+        initializeCanvas(backgroundColor, projectName);
         setupMouseListeners();
         setOpaque(false);
     }
 
-    private void initializeCanvas(Color backgroundColor) {
+    private void initializeCanvas(Color backgroundColor, String projectName) {
         buffer = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = buffer.createGraphics();
-        g2d.setColor(backgroundColor); // Fill the canvas with the background color
+        g2d.setColor(backgroundColor);
         g2d.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
         g2d.dispose();
 
         tempBuffer = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
-        loadLatestAutoSave();
+        loadLatestAutoSave(projectName);
     }
 
     @Override
@@ -161,44 +161,43 @@ public class Canvas extends JPanel {
     }
 
     // Automatically save the canvas if changes have been made
-    private void autoSave() {
-        if (!canvasChangedSinceLastSave || buffer==null) return; // If there are no changes or buffer is null, skip autosaving
+    private void autoSave(String projectName) {
+    if (!canvasChangedSinceLastSave || buffer == null) return;
 
-        try {
-            // Create the autosave directory if it doesn't exist
-            File autosaveDir = new File(".autosave");
-            if (!autosaveDir.exists()) autosaveDir.mkdirs();
+    try {
+        // Main saves directory (e.g., in user home)
+        String savesRoot = System.getProperty("user.home") + File.separator + "kraska_saves";
+        // Sanitize project name for folder use
+        String safeProjectName = projectName.replaceAll("[^a-zA-Z0-9\\-_]", "_");
+        File projectDir = new File(savesRoot, safeProjectName);
 
-            // Generate a filename based on the current timestamp
-            String filename = "autosave_" + System.currentTimeMillis() + ".png";
-            File file = new File(autosaveDir, filename);
+        if (!projectDir.exists()) projectDir.mkdirs();
 
-            // Create a safe copy of the canvas to save
-            BufferedImage safeCopy = copyCanvas();
+        // Generate a filename based on the current timestamp
+        String filename = "autosave_" + System.currentTimeMillis() + ".png";
+        File file = new File(projectDir, filename);
 
-            // Save the canvas copy as a PNG file
-            ImageIO.write(safeCopy, "PNG", file);
+        // Create a safe copy of the canvas to save
+        BufferedImage safeCopy = copyCanvas();
+        ImageIO.write(safeCopy, "PNG", file);
 
-            // Update the timestamp and reset the change flag
-            lastSavedTimestamp = System.currentTimeMillis();
-            canvasChangedSinceLastSave = false;
+        lastSavedTimestamp = System.currentTimeMillis();
+        canvasChangedSinceLastSave = false;
 
-            // Get all autosave files in the directory and clean up old ones if more than 3
-            File[] files = autosaveDir.listFiles((dir, name) -> name.endsWith(".png"));
-            if (files != null && files.length > 3) {
-                Arrays.sort(files, Comparator.comparingLong(File::lastModified));
-
-                for (int i = 0; i < files.length - 3; i++) {
-                    files[i].delete();
-                }
+        // Optionally, clean up old autosaves (e.g., keep only last 3)
+        File[] files = projectDir.listFiles((dir, name) -> name.endsWith(".png"));
+        if (files != null && files.length > 3) {
+            Arrays.sort(files, Comparator.comparingLong(File::lastModified));
+            for (int i = 0; i < files.length - 3; i++) {
+                files[i].delete();
             }
-
-            // Log the location where the autosave occurred
-            System.out.println("Auto-saved at: " + file.getAbsolutePath());
-        } catch (IOException ex) {
-            ex.printStackTrace();
         }
+
+        System.out.println("Auto-saved at: " + file.getAbsolutePath());
+    } catch (IOException ex) {
+        ex.printStackTrace();
     }
+}
 
     // Shutdown the autosave functionality (stop the autosave executor)
     public void shutdownAutosave() {
@@ -206,12 +205,16 @@ public class Canvas extends JPanel {
     }
 
     // Load the latest autosave file if it exists
-    public void loadLatestAutoSave() {
-        File autosaveDir = new File(".autosave");
-        if (!autosaveDir.exists()) return;
+    public void loadLatestAutoSave(String projectName) {
+        // Main saves directory (e.g., in user home)
+        String savesRoot = System.getProperty("user.home") + File.separator + "kraska_saves";
+        String safeProjectName = projectName.replaceAll("[^a-zA-Z0-9\\-_]", "_");
+        File projectDir = new File(savesRoot, safeProjectName);
 
-        // Get all .png files in the autosave directory
-        File[] files = autosaveDir.listFiles((dir, name) -> name.endsWith(".png"));
+        if (!projectDir.exists()) return;
+
+        // Get all .png files in the project autosave directory
+        File[] files = projectDir.listFiles((dir, name) -> name.endsWith(".png"));
         if (files == null || files.length == 0) return;
 
         // Find the most recently modified file
@@ -219,33 +222,20 @@ public class Canvas extends JPanel {
                 .max(Comparator.comparingLong(File::lastModified))
                 .orElse(null);
 
-        // If a valid autosave file is found, prompt the user to load it
-        // if (latest != null) {
-        //     int response = JOptionPane.showConfirmDialog(
-        //             this,
-        //             "Would you like to load the most recent autosave?",
-        //             "Autosave Found",
-        //             JOptionPane.YES_NO_OPTION
-        //     );
-
-        //     // If user selects "Yes", load the autosave file
-        //     if (response != JOptionPane.YES_OPTION) return;
-
-        //     try {
-        //         // Read the latest autosave file into a BufferedImage
-        //         BufferedImage loadedImage = ImageIO.read(latest);
-        //         if (loadedImage != null) {
-        //             // Draw the loaded image onto the buffer (canvas)
-        //             Graphics2D g2d = buffer.createGraphics();
-        //             g2d.drawImage(loadedImage, 0, 0, null);
-        //             g2d.dispose();
-        //             repaint();
-        //             System.out.println("Auto-saved canvas loaded from: " + latest.getAbsolutePath());
-        //         }
-        //     } catch (IOException e) {
-        //         e.printStackTrace();
-        //     }
-        // }
+        if (latest != null) {
+            try {
+                BufferedImage loadedImage = ImageIO.read(latest);
+                if (loadedImage != null) {
+                    Graphics2D g2d = buffer.createGraphics();
+                    g2d.drawImage(loadedImage, 0, 0, null);
+                    g2d.dispose();
+                    repaint();
+                    System.out.println("Auto-saved canvas loaded from: " + latest.getAbsolutePath());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void undo() {

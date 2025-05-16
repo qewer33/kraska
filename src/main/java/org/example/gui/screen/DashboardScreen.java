@@ -171,7 +171,7 @@ public class DashboardScreen extends AbstractScreen {
                 projectDatabase.addProject(new Project(projectName, LocalDateTime.now().toString(), LocalDateTime.now().toString()));
 
                 parentFrame.getContentPane().removeAll();
-                CanvasScreen canvasScreen = new CanvasScreen(width, height, backgroundColor);
+                CanvasScreen canvasScreen = new CanvasScreen(width, height, backgroundColor, projectName);
                 parentFrame.getContentPane().add(canvasScreen);
                 parentFrame.revalidate();
                 parentFrame.repaint();

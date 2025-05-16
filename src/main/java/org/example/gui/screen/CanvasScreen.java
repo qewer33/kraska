@@ -21,8 +21,8 @@ public class CanvasScreen extends AbstractScreen {
     Canvas canvas;
     CanvasViewer viewer;
 
-    public CanvasScreen(int width, int height, Color backgroundColor) {
-        this.canvas = new Canvas(width, height, backgroundColor);
+    public CanvasScreen(int width, int height, Color backgroundColor, String projectName) {
+        this.canvas = new Canvas(width, height, backgroundColor, projectName);
         this.viewer = new CanvasViewer(this.canvas);
 
         AppFile.setInstance(new AppFile(this.canvas));
