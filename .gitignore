@@ -36,3 +36,9 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### autosave ###
+.autosave
+
+### database ###
+*.db
