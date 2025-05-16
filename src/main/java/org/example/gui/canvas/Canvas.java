@@ -413,7 +413,14 @@ public class Canvas extends JPanel {
         this.tempBuffer = tempBuffer;
     }
 
-    public void setImage(BufferedImage buffer){this.buffer = buffer;}
+    public void setImage(BufferedImage buffer) {
+        this.buffer = buffer;
+        this.logicalSize = new Dimension(buffer.getWidth(), buffer.getHeight());
+        this.tempBuffer = new BufferedImage(buffer.getWidth(), buffer.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        setPreferredSize(getPreferredSize());
+        revalidate();
+        repaint();
+    }
 
     public BufferedImage getImage() {return buffer;}
 }

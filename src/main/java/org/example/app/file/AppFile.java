@@ -3,6 +3,7 @@ package org.example.app.file;
 import org.example.gui.canvas.Canvas;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -42,16 +43,36 @@ public class AppFile {
         }
     }
 
-    public void save(File targetFile) {
+    public void save() {
+        if (this.file != null) {
+            saveToFile(this.file);
+            JOptionPane.showMessageDialog(null, "File is successfully saved!");
+        } else {
+            saveAs();
+        }
+    }
+
+    public void saveAs() {
+        JFileChooser fileChooser = new JFileChooser();
+        int option = fileChooser.showSaveDialog(null);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            if (!selectedFile.getName().toLowerCase().endsWith(".png")) {
+                selectedFile = new File(selectedFile.getAbsolutePath() + ".png");
+            }
+            saveToFile(selectedFile);
+            this.file = selectedFile;
+            this.creationDate = new Date();
+        }
+    }
+    private void saveToFile(File targetFile) {
         try {
             BufferedImage image = canvas.getImage();
-            
             ImageIO.write(image, "png", targetFile);
-            this.file = targetFile;
             this.lastModifiedDate = new Date();
-
         } catch (IOException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Failed to save file.");
         }
     }
 }
