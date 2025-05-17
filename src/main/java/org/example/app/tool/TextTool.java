@@ -95,8 +95,9 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
 
             @Override
             public void focusLost(java.awt.event.FocusEvent e) {
+                if (activeTextField == null) return;
                 String userText = activeTextField.getText();
-                canvas.remove(activeTextField);
+                canvas.getViewer().getOverlayPanel().remove(activeTextField);
                 canvas.repaint();
                 if (!userText.isEmpty()) {
                     drawText(canvas, point.x, point.y + fontSize, userText);
@@ -117,12 +118,14 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         activeTextField.requestFocus();
 
         activeTextField.addActionListener(ev -> {
+            if (activeTextField == null) return;
             String userText = activeTextField.getText();
             canvas.getViewer().getOverlayPanel().remove(activeTextField);
             canvas.repaint();
             if (!userText.isEmpty()) {
                 drawText(canvas, point.x, point.y + fontSize, userText);
             }
+            activeTextField = null;
         });
     }
 
