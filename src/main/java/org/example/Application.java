@@ -14,6 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Objects;
 
 public class Application {
     public void run() {
@@ -52,6 +53,9 @@ public class Application {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(1600, 900);
         frame.setLayout(new BorderLayout());
+
+        ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icon.png")));
+        frame.setIconImage(icon.getImage());
 
         frame.setJMenuBar(new ApplicationMenu());
 

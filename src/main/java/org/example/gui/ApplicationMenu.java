@@ -8,6 +8,7 @@ import org.example.app.file.AppFile;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class ApplicationMenu extends JMenuBar {
     private final ToolManager toolManager = ToolManager.getInstance();
@@ -62,11 +63,12 @@ public class ApplicationMenu extends JMenuBar {
 
         JMenuItem aboutKraska = new JMenuItem("About Kraska");
 
-        aboutKraska.addActionListener(e ->
-                    JOptionPane.showMessageDialog(null,
-                            "Kraska - We love to help you paint your dream waifu <3 \n Every Waifu Is Special -Farhandir",
-                            "About Kraska",
-                            JOptionPane.INFORMATION_MESSAGE));
+        aboutKraska.addActionListener(e -> {
+            Window window = SwingUtilities.getWindowAncestor(this);
+            if (window instanceof JFrame) {
+                showAboutDialog((JFrame) window);
+            }
+        });
 
         helpMenu.add(aboutKraska);
 
@@ -108,8 +110,44 @@ public class ApplicationMenu extends JMenuBar {
         saveAsFile.addActionListener(e -> {
            AppFile.getInstance().saveAs();
         });
-
-
     }
 
+    private void showAboutDialog(JFrame parent) {
+        JDialog dialog = new JDialog(parent, "About", true);
+        dialog.setLayout(new BorderLayout());
+
+        JLabel bannerLabel = new JLabel();
+        ImageIcon bannerIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/banner.png")));
+        bannerLabel.setIcon(bannerIcon);
+        dialog.add(bannerLabel, BorderLayout.NORTH);
+
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20));
+
+        infoPanel.add(centeredLabel("Yunus Erdem ERGÜL"));
+        infoPanel.add(centeredLabel("Mehmet Emircan KÜLLÜCEK"));
+        infoPanel.add(centeredLabel("Aleksei KHLOPKOV"));
+        infoPanel.add(centeredLabel("Fariz Berke TUTANÇ"));
+        infoPanel.add(Box.createVerticalStrut(15));
+        infoPanel.add(centeredLabel("Licensed under the GNU General Public License v3.0"));
+
+        dialog.add(infoPanel, BorderLayout.CENTER);
+
+        JButton okButton = new JButton("OK");
+        okButton.addActionListener(e -> dialog.dispose());
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(okButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.pack(); // Resize to fit all contents
+        dialog.setLocationRelativeTo(parent);
+        dialog.setVisible(true);
+    }
+
+    private JLabel centeredLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return label;
+    }
 }
