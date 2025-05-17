@@ -28,6 +28,7 @@ public class CanvasToolbar extends JToolBar {
             button.setAction(actionManager.getAction(tool.getName()));
             button.setHideActionText(true);
             button.setToolTipText(tool.getName());
+            if (tool.getName().equals("Brush")) button.setSelected(true);
 
             toolGroup.add(button);
             addSeparator(new Dimension(0, 5));

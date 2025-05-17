@@ -1,7 +1,5 @@
 package org.example.gui.canvas;
 
-import org.example.app.tool.AbstractTool;
-import org.example.app.tool.ToolManager;
 import org.example.gui.canvas.selection.SelectionManager;
 import org.example.gui.canvas.selection.SelectionView;
 
@@ -17,7 +15,6 @@ public class CanvasViewer extends JScrollPane {
     private final Canvas canvas;
     private double zoomFactor = 1.0;
     private Point panStartPoint;
-    private Point viewStartPoint;
 
     private final SelectionManager selectionManager = SelectionManager.getInstance();
 
@@ -59,15 +56,15 @@ public class CanvasViewer extends JScrollPane {
         // Still add wheel listener to viewer
         addMouseWheelListener(this::handleMouseWheel);
 
-        // Middle mouse panningvas
+        // Middle mouse panning
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (SwingUtilities.isMiddleMouseButton(e)) {
-                    panStartPoint = e.getPoint();
-                    viewStartPoint = getViewport().getViewPosition();
+                    // Convert to viewport coordinates
+                    panStartPoint = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), getViewport());
                     canvas.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-                    e.consume(); // prevent paint tools from triggering
+                    e.consume();
                 }
             }
 
@@ -75,7 +72,7 @@ public class CanvasViewer extends JScrollPane {
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isMiddleMouseButton(e)) {
                     panStartPoint = null;
-                    viewStartPoint = null;
+                    canvas.setCursor(Cursor.getDefaultCursor());
                     e.consume();
                 }
             }
@@ -84,8 +81,10 @@ public class CanvasViewer extends JScrollPane {
         canvas.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (panStartPoint != null && viewStartPoint != null) {
-                    handlePanning(e.getPoint());
+                if (panStartPoint != null) {
+                    Point current = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), getViewport());
+                    handlePanning(current);
+                    panStartPoint = current; // <- Key to eliminate jitter
                     e.consume();
                 }
             }
@@ -113,19 +112,15 @@ public class CanvasViewer extends JScrollPane {
     }
 
     private void handlePanning(Point currentMouse) {
+        JViewport viewport = getViewport();
+
         int dx = panStartPoint.x - currentMouse.x;
         int dy = panStartPoint.y - currentMouse.y;
 
-        int newX = viewStartPoint.x + dx;
-        int newY = viewStartPoint.y + dy;
+        Point viewPos = viewport.getViewPosition();
 
-        // Clamp to bounds
-        JViewport viewport = getViewport();
-        Dimension viewSize = viewport.getViewSize();
-        Dimension extentSize = viewport.getExtentSize();
-
-        newX = Math.max(0, Math.min(viewSize.width - extentSize.width, newX));
-        newY = Math.max(0, Math.min(viewSize.height - extentSize.height, newY));
+        int newX = Math.max(0, Math.min(viewPos.x + dx, viewport.getViewSize().width - viewport.getExtentSize().width));
+        int newY = Math.max(0, Math.min(viewPos.y + dy, viewport.getViewSize().height - viewport.getExtentSize().height));
 
         viewport.setViewPosition(new Point(newX, newY));
     }

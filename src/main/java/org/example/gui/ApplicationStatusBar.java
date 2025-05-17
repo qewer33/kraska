@@ -15,7 +15,7 @@ public class ApplicationStatusBar extends JPanel {
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-        JLabel zoom = new JLabel();
+        JLabel zoom = new JLabel("%100");
 
         JSlider zoomSlider = new JSlider(10, 500, 100);
         zoomSlider.setMaximumSize(new Dimension(125, 20));
@@ -36,7 +36,7 @@ public class ApplicationStatusBar extends JPanel {
         canvasViewer.addPropertyChangeListener("zoomFactor", evt -> {
             int zoomPercentage = (int) (canvasViewer.getZoomFactor() * 100);
             zoomSlider.setValue(zoomPercentage);
-            zoom.setText("Zoom: %" + zoomSlider.getValue());
+            zoom.setText("%" + zoomSlider.getValue());
         });
 
 
@@ -95,5 +95,6 @@ public class ApplicationStatusBar extends JPanel {
         add(decreaseButton);
         add(zoomSlider);
         add(increaseButton);
+        add(Box.createRigidArea(new Dimension(5, 0)));
     }
 }

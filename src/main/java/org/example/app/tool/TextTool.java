@@ -3,28 +3,38 @@ package org.example.app.tool;
 import org.example.app.color.ColorManager;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasPainter;
+import org.example.gui.canvas.selection.Selection;
+import org.example.gui.canvas.selection.SelectionManager;
 import org.example.gui.screen.component.ToolOptionsPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 public class TextTool extends AbstractTool implements CanvasPainter, ToolOptionsProvider {
-
-    private final ColorManager colorManager;
     private Color color;
     private int fontSize = 24;
     private String fontName = "Arial";
     private boolean isBold = false;
     private boolean isItalic = false;
     private JTextField activeTextField = null;
-    Point point;
+    private Point point;
+
+    private final ColorManager colorManager = ColorManager.getInstance();
+    private final SelectionManager selectionManager = SelectionManager.getInstance();
 
 
     public TextTool() {
         super("Text");
-        this.colorManager = ColorManager.getInstance();
         this.color = colorManager.getPrimary();
+    }
+
+    @Override
+    public void onActivate() {
+        selectionManager.restrictToolInput = true;
     }
 
     // Create and return the options panel for the text tool
@@ -38,6 +48,7 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         JComboBox<String> fontComboBox = new JComboBox<>(fonts);
         fontComboBox.setSelectedItem(fontName);
         fontComboBox.setMaximumRowCount(10);
+        fontComboBox.setPreferredSize(new Dimension(150, fontComboBox.getPreferredSize().height));
 
         // Font size slider
         JLabel sizeLabel = new JLabel("Size: " + fontSize);
@@ -146,6 +157,7 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         int style = (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0);
         Font font = new Font(fontName, style, fontSize);
 
+        /*
         Graphics2D g2d = canvas.getCanvasImage().createGraphics();
         g2d.setFont(font);
         g2d.setColor(color);
@@ -153,6 +165,39 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         g2d.drawString(text, x, y);
         g2d.dispose();
         canvas.repaint();
+         */
+
+        Dimension size = activeTextField.getSize();
+        int w = size.width;
+        int h = size.height;
+
+        BufferedImage copy = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = copy.createGraphics();
+        g.setFont(font);
+        g.setColor(color);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        Rectangle2D bounds = getTextBounds(g, text, font);
+
+        Selection sel = new Selection(new Rectangle(x, y + (int) bounds.getY(), (int) bounds.getWidth(), (int) bounds.getHeight()));
+        copy = new BufferedImage((int) bounds.getWidth(), (int) bounds.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        g = copy.createGraphics();
+        g.setFont(font);
+        g.setColor(color);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        g.drawString(text, 0, (int) -bounds.getY());
+        g.dispose();
+
+        sel.setContent(copy);
+        SelectionManager.getInstance().setSelection(sel);
+
+        canvas.repaint();
+    }
+
+    public Rectangle2D getTextBounds(Graphics2D g2, String text, Font font) {
+        FontRenderContext frc = g2.getFontRenderContext();
+        return font.getStringBounds(text, frc);
     }
 
     @Override public void onMouseDrag(Canvas canvas, MouseEvent e) {}

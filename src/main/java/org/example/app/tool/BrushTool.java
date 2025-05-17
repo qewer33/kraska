@@ -118,7 +118,7 @@ public class BrushTool extends AbstractTool implements CanvasPainter, ToolOption
         }
 
         JLabel sizeLabel = new JLabel("Size: " + size + "px");
-        JSlider sizeSlider = new JSlider(1, 100, size);
+        JSlider sizeSlider = new JSlider(1, 250, size);
         sizeSlider.addChangeListener(e -> {
             size = sizeSlider.getValue();
             sizeLabel.setText("Size: " + size + "px");

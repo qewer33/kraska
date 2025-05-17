@@ -57,7 +57,6 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
             currentState = State.MOVING;
             moveStartPoint = clicked;
         } else {
-            if (isActive) isActive = false;
             startPoint = clicked;
             currentPoint = clicked;
             currentState = State.CREATING;
@@ -65,6 +64,7 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
             rotationAngle = 0;
             currentSelection = null;
             tempPaintOverlay = true;
+            isActive = false;
             System.out.println("Creating new selection");
         }
 
@@ -148,6 +148,7 @@ public class SelectionView implements CanvasPainter, OverlayPainter {
 
     @Override
     public void onMouseRelease(org.example.gui.canvas.Canvas canvas, MouseEvent e) {
+        if (!isActive) return;
         if (currentState == State.CREATING && startPoint != null && currentPoint != null) {
             int x = Math.min(startPoint.x, currentPoint.x);
             int y = Math.min(startPoint.y, currentPoint.y);

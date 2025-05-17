@@ -34,9 +34,9 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
     private ShapeType shapeType = ShapeType.LINE;
     private boolean filled = false;
     private int thickness = 5;
-    private boolean activateSelection = false;
     private Point startPoint;
     private Point lastPoint;
+    private Rectangle shapeBounds;
 
     private final ColorManager colorManager = ColorManager.getInstance();
     private final SelectionManager selectionManager = SelectionManager.getInstance();
@@ -55,6 +55,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         if (e.getButton() == MouseEvent.BUTTON1 || e.getButton() == MouseEvent.BUTTON3) {
             startPoint = canvas.getUnzoomedPoint(e.getPoint());
             canvas.clearTempBuffer();
+            shapeBounds = new Rectangle(0, 0, 0, 0);
         }
     }
 
@@ -85,6 +86,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
                         current.y = startPoint.y + (int) (Math.sin(angle) * length);
                     }
                     g2d.drawLine(startPoint.x, startPoint.y, current.x, current.y);
+                    shapeBounds.setBounds(startPoint.x, startPoint.y, Math.abs(current.x - startPoint.x), Math.abs(current.y - startPoint.y));
                 }
                 case RECTANGLE -> {
                     int x = Math.min(startPoint.x, current.x);
@@ -103,6 +105,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
                         g2d.setColor(colorManager.getPrimary());
                     }
                     g2d.drawRect(x, y, w, h);
+                    shapeBounds.setBounds(x, y, w, h);
                 }
                 case ELLIPSE -> {
                     int x = Math.min(startPoint.x, current.x);
@@ -121,6 +124,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
                         g2d.setColor(colorManager.getPrimary());
                     }
                     g2d.drawOval(x, y, w, h);
+                    shapeBounds.setBounds(x, y, w, h);
                 }
                 case TRIANGLE -> {
                     if (shiftDown) {
@@ -144,6 +148,12 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
                         g2d.setColor(colorManager.getPrimary());
                     }
                     g2d.drawPolygon(xPoints, yPoints, 3);
+
+                    int x = Math.min(x1, x2);
+                    int y = Math.min(y1, y2);
+                    int w = Math.abs(x2 - x1);
+                    int h = Math.abs(y2 - y1);
+                    shapeBounds.setBounds(x, y, w, h);
                 }
                 case HEXAGON -> drawHexagon(g2d, startPoint, current);
                 case LIGHTNING -> drawLightning(g2d, startPoint, current);
@@ -170,21 +180,21 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
 
     @Override
     public void onMouseRelease(Canvas canvas, MouseEvent e) {
-        if (startPoint != null && !activateSelection) {
-            canvas.applyTempBuffer(1.0f);
-        }
-        if (startPoint != null && activateSelection) {
-            int x = Math.min(startPoint.x, lastPoint.x);
-            int y = Math.min(startPoint.y, lastPoint.y);
-            int w = Math.abs(startPoint.x - lastPoint.x);
-            int h = Math.abs(startPoint.y - lastPoint.y);
+        if (lastPoint == null) return;
+        if (startPoint != null) {
+            int x = shapeBounds.x;
+            int y = shapeBounds.y;
+            int w = shapeBounds.width;
+            int h = shapeBounds.height;
 
-            Selection sel = new Selection(new Rectangle(x, y, w, h));
+            int pad = thickness;
+
+            Selection sel = new Selection(new Rectangle(x-pad, y-pad, w+pad*2, h+pad*2));
 
             BufferedImage tempBuf = canvas.getTempBuffer();
-            BufferedImage copy = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage copy = new BufferedImage(w+pad*2, h+pad*2, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g = copy.createGraphics();
-            g.drawImage(tempBuf, 0, 0, w, h, x, y, x + w, y + h, null);
+            g.drawImage(tempBuf, 0, 0, w+pad*2, h+pad*2, x-pad, y-pad, x + w + pad, y + h + pad, null);
             g.dispose();
 
             sel.setContent(copy);
@@ -193,6 +203,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             canvas.clearTempBuffer();
         }
         startPoint = null;
+        lastPoint = null;
     }
 
     @Override
@@ -253,12 +264,6 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
             thicknessLabel.setText("Thickness: " + thickness + "px");
         });
 
-        // Activate selection checkbox
-        JCheckBox activateSelectionBox = new JCheckBox("Select after creation");
-        activateSelectionBox.setSelected(activateSelection);
-        activateSelectionBox.addItemListener(e -> activateSelection = activateSelectionBox.isSelected());
-        activateSelectionBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         panel.addComponentGroup(new JComponent[]{
                 shapeLabel,
                 buttonGrid,
@@ -268,7 +273,6 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
                 thicknessSlider,
         });
         panel.addComponent(fillBox);
-        panel.addComponent(activateSelectionBox);
 
         return panel;
     }
@@ -299,6 +303,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         }
         path.closePath();
         drawFillPath(g2d, path);
+        shapeBounds.setBounds(x, y, size, size);
     }
 
     private void drawLightning(Graphics2D g2d, Point start, Point end) {
@@ -317,6 +322,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         path.lineTo(x + w * 0.3, y + h * 0.5);
         path.closePath();
         drawFillPath(g2d, path);
+        shapeBounds.setBounds(x, y, w, h);
     }
 
     private void drawStar(Graphics2D g2d, Point start, Point end) {
@@ -349,6 +355,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         }
         path.closePath();
         drawFillPath(g2d, path);
+        shapeBounds.setBounds((int) centerX-size/2, (int) centerY-size/2, size, size);
     }
 
     private void drawHeart(Graphics2D g2d, Point start, Point end) {
@@ -379,6 +386,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
 
         path.closePath();
         drawFillPath(g2d, path);
+        shapeBounds.setBounds((int) cx-size/2, (int) cy-size/2, size, (int) (size*0.75));
     }
 
     private void drawFillPath(Graphics2D g2d, Path2D path) {
@@ -413,6 +421,7 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
         }
 
         g2d.drawImage(image, x, y, w, h, null);
+        shapeBounds.setBounds(x, y, w, h);
     }
 }
 

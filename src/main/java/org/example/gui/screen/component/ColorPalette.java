@@ -39,7 +39,6 @@ public class ColorPalette extends JPanel {
             colorButton.setPreferredSize(new Dimension(25, 25));
             colorButton.setBackground(color);
             colorButton.setOpaque(true);
-            colorButton.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
             colorButton.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override

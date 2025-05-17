@@ -57,7 +57,6 @@ public class CanvasSidebar extends JPanel {
         primaryColorBtn.setPreferredSize(new Dimension(35, 35));
         primaryColorBtn.setBackground(colorManager.getPrimary());
         primaryColorBtn.setOpaque(true);
-        primaryColorBtn.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         primaryColorBtn.addActionListener(e -> {
             Color chosen = JColorChooser.showDialog(this, "Pick Primary Color", colorManager.getPrimary());
             if (chosen != null) {
@@ -70,7 +69,6 @@ public class CanvasSidebar extends JPanel {
         secondaryColorBtn.setPreferredSize(new Dimension(35, 35));
         secondaryColorBtn.setBackground(colorManager.getSecondary());
         secondaryColorBtn.setOpaque(true);
-        secondaryColorBtn.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         secondaryColorBtn.addActionListener(e -> {
             Color chosen = JColorChooser.showDialog(this, "Pick Secondary Color", colorManager.getSecondary());
             if (chosen != null) {
