@@ -59,7 +59,7 @@ public class CanvasViewer extends JScrollPane {
         // Still add wheel listener to viewer
         addMouseWheelListener(this::handleMouseWheel);
 
-        // 🔁 Middle mouse panning — now added to the canvas
+        // Middle mouse panningvas
         canvas.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -76,7 +76,6 @@ public class CanvasViewer extends JScrollPane {
                 if (SwingUtilities.isMiddleMouseButton(e)) {
                     panStartPoint = null;
                     viewStartPoint = null;
-                    canvas.setCursor(Cursor.getDefaultCursor());
                     e.consume();
                 }
             }
