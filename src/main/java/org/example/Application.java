@@ -57,7 +57,7 @@ public class Application {
         ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icon.png")));
         frame.setIconImage(icon.getImage());
 
-        frame.setJMenuBar(new ApplicationMenu());
+        frame.setJMenuBar(new ApplicationMenu(frame));
 
         // Show DashboardScreen first
         DashboardScreen dashboardScreen = new DashboardScreen(frame);

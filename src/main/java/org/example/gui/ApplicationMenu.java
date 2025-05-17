@@ -3,7 +3,7 @@ package org.example.gui;
 import org.example.app.ActionManager;
 import org.example.app.tool.AbstractTool;
 import org.example.app.tool.ToolManager;
-
+import org.example.gui.screen.DashboardScreen;
 import org.example.app.file.AppFile;
 
 import javax.swing.*;
@@ -14,7 +14,7 @@ public class ApplicationMenu extends JMenuBar {
     private final ToolManager toolManager = ToolManager.getInstance();
     private final ActionManager actionManager = ActionManager.getInstance();
 
-    public ApplicationMenu() {
+    public ApplicationMenu(JFrame parentFrame) {
         // File menu
         JMenu fileMenu = new JMenu("File");
 
@@ -22,11 +22,14 @@ public class ApplicationMenu extends JMenuBar {
         JMenuItem openFile = new JMenuItem("Open");
         JMenuItem saveFile = new JMenuItem("Save");
         JMenuItem saveAsFile = new JMenuItem("Save As..");
+        JMenuItem returnToDashboard = new JMenuItem("Return to Dashboard"); // Add this line
 
         fileMenu.add(newFile);
         fileMenu.add(openFile);
         fileMenu.add(saveFile);
         fileMenu.add(saveAsFile);
+        fileMenu.addSeparator();
+        fileMenu.add(returnToDashboard); // Add this line
 
         // Edit menu
         JMenu editMenu = new JMenu("Edit");
@@ -109,6 +112,14 @@ public class ApplicationMenu extends JMenuBar {
 
         saveAsFile.addActionListener(e -> {
            AppFile.getInstance().saveAs();
+        });
+
+        // Add action for returning to dashboard
+        returnToDashboard.addActionListener(e -> {
+            parentFrame.getContentPane().removeAll();
+            parentFrame.getContentPane().add(new DashboardScreen(parentFrame));
+            parentFrame.revalidate();
+            parentFrame.repaint();
         });
     }
 
