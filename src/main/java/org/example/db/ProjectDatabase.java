@@ -29,10 +29,10 @@ public class ProjectDatabase {
         DatabaseManager.addProject(project);
     }
 
-    // public void removeProject(Project project) {
-    //     projects.remove(project);
-    //     DatabaseManager.removeProject(project);
-    // }
+    public void removeProject(String projectName) {
+        projects.removeIf(p -> p.getName().equals(projectName));
+        DatabaseManager.removeProject(projectName);
+    }
 
     public void updateLastOpened(String projectName, String newLastOpened) {
         DatabaseManager.updateLastOpened(projectName, newLastOpened);
