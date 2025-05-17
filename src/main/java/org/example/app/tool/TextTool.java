@@ -106,23 +106,23 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         });
 
         canvas.addPropertyChangeListener("zoomFactor", evt -> {
+            if (activeTextField == null) return;
             activeTextField.setFont(new Font(fontName, (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0), (int) (fontSize*canvas.getZoomFactor())));
             updateWidth(canvas);
         });
 
-        canvas.setLayout(null);
-        canvas.add(activeTextField);
+        canvas.getViewer().getOverlayPanel().setLayout(null);
+        canvas.getViewer().getOverlayPanel().add(activeTextField);
         canvas.repaint();
         activeTextField.requestFocus();
 
         activeTextField.addActionListener(ev -> {
             String userText = activeTextField.getText();
-            canvas.remove(activeTextField);
+            canvas.getViewer().getOverlayPanel().remove(activeTextField);
             canvas.repaint();
             if (!userText.isEmpty()) {
                 drawText(canvas, point.x, point.y + fontSize, userText);
             }
-            activeTextField = null;
         });
     }
 

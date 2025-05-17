@@ -157,6 +157,10 @@ public class CanvasViewer extends JScrollPane {
         return canvas;
     }
 
+    public JPanel getOverlayPanel() {
+        return overlayPanel;
+    }
+
     // OverlayPanel handles painting of on canvas overlays (e.g. selection)
     private class OverlayPanel extends JPanel {
         @Override

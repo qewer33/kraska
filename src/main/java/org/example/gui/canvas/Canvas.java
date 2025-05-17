@@ -409,4 +409,8 @@ public class Canvas extends JPanel {
     }
 
     public BufferedImage getImage() {return buffer;}
+
+    public CanvasViewer getViewer() {
+        return (CanvasViewer) getParent().getParent().getParent().getParent();
+    }
 }

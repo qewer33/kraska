@@ -320,14 +320,16 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
     }
 
     private void drawStar(Graphics2D g2d, Point start, Point end) {
-        int x = Math.min(start.x, end.x);
-        int y = Math.min(start.y, end.y);
+        int x = start.x;
+        int y = start.y;
         int w = Math.abs(end.x - start.x);
         int h = Math.abs(end.y - start.y);
         int size = Math.min(w, h); // make it square for symmetry
 
-        double centerX = x + size / 2.0;
-        double centerY = y + size / 2.0;
+        int xd = (x < end.x) ? 1 : -1;
+        int yd = (y < end.y) ? 1 : -1;
+        double centerX = x + size*xd / 2.0;
+        double centerY = y + size*yd / 2.0;
         double radiusOuter = size / 2.0;
         double radiusInner = radiusOuter * 0.5;
 
@@ -350,14 +352,16 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
     }
 
     private void drawHeart(Graphics2D g2d, Point start, Point end) {
-        int x = Math.min(start.x, end.x);
-        int y = Math.min(start.y, end.y);
+        int x = start.x;
+        int y = start.y;
         int w = Math.abs(end.x - start.x);
         int h = Math.abs(end.y - start.y);
         int size = Math.min(w, h);
 
-        double cx = x + size / 2.0;
-        double cy = y + size / 2.0;
+        int xd = (x < end.x) ? 1 : -1;
+        int yd = (y < end.y) ? 1 : -1;
+        double cx = x + size*xd / 2.0;
+        double cy = y + size*yd / 2.0;
         double r = size / 4.0;
 
         Path2D path = new Path2D.Double();
