@@ -85,6 +85,7 @@ public class CanvasSidebar extends JPanel {
         ImageIcon swapIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/swap.png")));
 
         JButton swapBtn = new JButton(swapIcon);
+        swapBtn.setToolTipText("Swap The Colors");
         swapBtn.setPreferredSize(new Dimension(40, 20));
         swapBtn.addActionListener(e -> {
             colorManager.swap();

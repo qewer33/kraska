@@ -16,6 +16,8 @@ import org.example.db.ProjectDatabase;
 import org.example.gui.screen.component.DashboardBannerPanel;
 
 public class DashboardScreen extends AbstractScreen {
+    private static DashboardScreen instance;
+
     private final JFrame parentFrame;
     private final JTable projectTable;
     private final DefaultTableModel tableModel;
@@ -24,6 +26,7 @@ public class DashboardScreen extends AbstractScreen {
 
     public DashboardScreen(JFrame parentFrame) {
         this.parentFrame = parentFrame;
+        DashboardScreen.instance = this;
         setLayout(new BorderLayout());
 
         // Setup banner
@@ -89,7 +92,7 @@ public class DashboardScreen extends AbstractScreen {
         }
     }
 
-    private void openCanvasSettingsWindow(ActionEvent e) {
+    public void openCanvasSettingsWindow(ActionEvent e) {
         // Create a floating settings window
         JDialog settingsDialog = new JDialog(parentFrame, "Project Settings", true);
         settingsDialog.setSize(400, 350);
@@ -174,7 +177,7 @@ public class DashboardScreen extends AbstractScreen {
                 projectDatabase.addProject(new Project(projectName, LocalDateTime.now().toString(), LocalDateTime.now().toString()));
 
                 parentFrame.getContentPane().removeAll();
-                CanvasScreen canvasScreen = new CanvasScreen(width, height, backgroundColor, projectName);
+                CanvasScreen canvasScreen = new CanvasScreen(parentFrame, width, height, backgroundColor, projectName);
                 parentFrame.getContentPane().add(canvasScreen);
                 parentFrame.revalidate();
                 parentFrame.repaint();
@@ -234,7 +237,7 @@ public class DashboardScreen extends AbstractScreen {
 
                 // Remove dashboard and show CanvasScreen for this project
                 parentFrame.getContentPane().removeAll();
-                CanvasScreen canvasScreen = new CanvasScreen(800, 600, Color.WHITE, projectName);
+                CanvasScreen canvasScreen = new CanvasScreen(parentFrame, 800, 600, Color.WHITE, projectName);
                 canvasScreen.getCanvas().loadLatestAutoSave(projectName);
                 parentFrame.getContentPane().add(canvasScreen);
                 parentFrame.revalidate();
@@ -327,4 +330,7 @@ public class DashboardScreen extends AbstractScreen {
             }
         }
     }
+    public static DashboardScreen getInstance() {return instance;}
+
+    public static void setInstance(DashboardScreen screen) {instance = screen;}
 }

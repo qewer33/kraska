@@ -8,6 +8,7 @@ import org.example.app.file.AppFile;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.Objects;
 
 public class ApplicationMenu extends JMenuBar {
@@ -84,7 +85,7 @@ public class ApplicationMenu extends JMenuBar {
 
         // The things happening when you click the things
         newFile.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null, "We didn't code it yet");
+            DashboardScreen.getInstance().openCanvasSettingsWindow(null);
         });
 
         openFile.addActionListener(e -> {
@@ -141,7 +142,7 @@ public class ApplicationMenu extends JMenuBar {
         infoPanel.add(centeredLabel("Aleksei KHLOPKOV"));
         infoPanel.add(centeredLabel("Fariz Berke TUTANÇ"));
         infoPanel.add(Box.createVerticalStrut(15));
-        infoPanel.add(centeredLabel("Thanks to Muhammed Arif DAYI for beta testing"));
+        infoPanel.add(centeredLabel("Thanks to Muhammed Arif DAYI (We heard that he got 27cm penis) for beta testing"));
         infoPanel.add(Box.createVerticalStrut(15));
         infoPanel.add(centeredLabel("Licensed under the GNU General Public License v3.0"));
 

@@ -8,10 +8,7 @@ import org.example.app.tool.ToolManager;
 import org.example.gui.ApplicationStatusBar;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasViewer;
-import org.example.gui.screen.component.CanvasFileOperationsBar;
-import org.example.gui.screen.component.CanvasRotateBar;
-import org.example.gui.screen.component.CanvasSidebar;
-import org.example.gui.screen.component.CanvasToolbar;
+import org.example.gui.screen.component.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +18,7 @@ public class CanvasScreen extends AbstractScreen {
     Canvas canvas;
     CanvasViewer viewer;
 
-    public CanvasScreen(int width, int height, Color backgroundColor, String projectName) {
+    public CanvasScreen(JFrame parentFrame, int width, int height, Color backgroundColor, String projectName) {
         this.canvas = new Canvas(width, height, backgroundColor, projectName);
         this.viewer = new CanvasViewer(this.canvas);
 
@@ -39,13 +36,22 @@ public class CanvasScreen extends AbstractScreen {
         this.add(viewer, BorderLayout.CENTER); // Canvas viewer in center
         this.add(statusBar, BorderLayout.SOUTH);
 
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // Yan yana dizilim
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.add(fileOperationsBar);
         topPanel.add(Box.createRigidArea(new Dimension(380, 0)));
         topPanel.add(rotateBar);
 
-        this.add(topPanel, BorderLayout.NORTH);
+        JPanel topBarContainer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        topBarContainer.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 170));
+        CanvasTopSideBar topBar = new CanvasTopSideBar(parentFrame, canvas);
+        topBarContainer.add(topBar);
+
+        JPanel topWrapper = new JPanel(new BorderLayout());
+        topWrapper.add(topPanel, BorderLayout.WEST);
+        topWrapper.add(topBarContainer, BorderLayout.EAST);
+
+        this.add(topWrapper, BorderLayout.NORTH);
+
 
 
         CanvasSidebar sidebar = new CanvasSidebar();

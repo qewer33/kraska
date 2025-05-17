@@ -26,6 +26,12 @@ public class CanvasRotateBar extends JToolBar {
         JButton flipVerticalButton = new JButton(flipVerticalIcon);
         JButton flipHorizontalButton = new JButton(flipHorizontalIcon);
 
+        // Butonun üste basınca çıkan texti yapcam
+        rotateRightButton.setToolTipText("Rotate The Canvas Right");
+        rotateLeftButton.setToolTipText("Rotate The Canvas Left");
+        flipHorizontalButton.setToolTipText("Flip The Canvas Horizontally");
+        flipVerticalButton.setToolTipText("Flip The Canvas Vertically");
+
         // Add and configure buttons
         addSeparator(new Dimension(5, 0));
         add(rotateRightButton);

@@ -2,6 +2,7 @@ package org.example.gui.screen.component;
 
 import org.example.app.file.AppFile;
 import org.example.gui.canvas.Canvas;
+import org.example.gui.screen.DashboardScreen;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,16 +26,24 @@ public class CanvasFileOperationsBar extends JToolBar {
 
         // === Tool Buttons ===
         JButton newButton = new JButton(newIcon);
+        newButton.addActionListener(e->DashboardScreen.getInstance().openCanvasSettingsWindow(null));
+        newButton.setToolTipText("New Canvas");
         JButton openButton = new JButton(openIcon);
+        openButton.setToolTipText("Open a File");
         JButton undoButton = new JButton(undoIcon);
+        undoButton.setToolTipText("Undo the Last 'do'");
         undoButton.addActionListener(e->canvas.undo());
         JButton redoButton = new JButton(redoIcon);
+        redoButton.setToolTipText("Redo the Last 'do'");
         redoButton.addActionListener(e->canvas.redo());
         JButton saveButton = new JButton(saveIcon);
+        saveButton.setToolTipText("Save This File");
         saveButton.addActionListener(e -> AppFile.getInstance().save());
         JButton saveAsButton = new JButton(saveAsIcon);
+        saveAsButton.setToolTipText("Save This File As ..");
         saveAsButton.addActionListener(e -> AppFile.getInstance().saveAs());
         JButton exportButton = new JButton(exportIcon);
+        exportButton.setToolTipText("Export This File");
 
         // Add buttons
         addSeparator(new Dimension(5, 0));
