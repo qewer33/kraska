@@ -130,6 +130,8 @@ public class ApplicationMenu extends JMenuBar {
         infoPanel.add(centeredLabel("Aleksei KHLOPKOV"));
         infoPanel.add(centeredLabel("Fariz Berke TUTANÇ"));
         infoPanel.add(Box.createVerticalStrut(15));
+        infoPanel.add(centeredLabel("Thanks to Muhammed Arif DAYI for beta testing"));
+        infoPanel.add(Box.createVerticalStrut(15));
         infoPanel.add(centeredLabel("Licensed under the GNU General Public License v3.0"));
 
         dialog.add(infoPanel, BorderLayout.CENTER);
