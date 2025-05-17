@@ -79,6 +79,16 @@ public class DatabaseManager {
         }
     }
 
+    public static void removeProject(String projectName) {
+        String sql = "DELETE FROM projects WHERE name = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, projectName);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error while trying to delete project: " + e.getMessage());
+        }
+    }
+
     public static void closeConnection() {
         try {
             if (conn != null) {
