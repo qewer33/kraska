@@ -12,6 +12,7 @@ import javax.swing.table.TableColumn;
 
 import org.example.db.Project;
 import org.example.db.ProjectDatabase;
+import org.example.gui.screen.component.DashboardBannerPanel;
 
 public class DashboardScreen extends AbstractScreen {
     private final JFrame parentFrame;
@@ -23,6 +24,11 @@ public class DashboardScreen extends AbstractScreen {
     public DashboardScreen(JFrame parentFrame) {
         this.parentFrame = parentFrame;
         setLayout(new BorderLayout());
+
+        // Setup banner
+        DashboardBannerPanel bannerPanel = new DashboardBannerPanel();
+        bannerPanel.newProjectButton.addActionListener(this::openCanvasSettingsWindow);
+        add(bannerPanel, BorderLayout.NORTH);
 
         // Table to display projects
         String[] columnNames = {"Name", "Created", "Last Updated", "Actions"};
@@ -48,15 +54,6 @@ public class DashboardScreen extends AbstractScreen {
 
         // Add table to the center of the layout
         add(scrollPane, BorderLayout.CENTER);
-
-        // Create Canvas button
-        JButton createCanvasButton = new JButton("Create New Project");
-        createCanvasButton.addActionListener(this::openCanvasSettingsWindow);
-
-        // Add button to the bottom of the layout
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(createCanvasButton);
-        add(buttonPanel, BorderLayout.SOUTH);
     }
 
     private void loadProjects() {
