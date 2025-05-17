@@ -229,28 +229,16 @@ public class DashboardScreen extends AbstractScreen {
                 int row = projectTable.getSelectedRow();
                 String projectName = (String) tableModel.getValueAt(row, 0);
 
-                int confirm = JOptionPane.showConfirmDialog(parentFrame,
-                        "Are you sure you want to delete project \"" + projectName + "\"?",
-                        "Delete Project", JOptionPane.YES_NO_OPTION);
+                // Update last opened time in the database
+                projectDatabase.updateLastOpened(projectName, java.time.LocalDateTime.now().toString());
 
-                if (confirm == JOptionPane.YES_OPTION) {
-                    // Remove from database and memory
-                    projectDatabase.removeProject(projectName);
-
-                    // Remove autosave folder
-                    String savesRoot = System.getProperty("user.home") + File.separator + "kraska_saves";
-                    String safeProjectName = projectName.replaceAll("[^a-zA-Z0-9\\-_]", "_");
-                    File projectDir = new File(savesRoot, safeProjectName);
-                    deleteDirectoryRecursively(projectDir);
-
-                    // Stop editing before refreshing table to avoid ArrayIndexOutOfBoundsException
-                    SwingUtilities.invokeLater(() -> {
-                        if (projectTable.isEditing()) {
-                            projectTable.getCellEditor().stopCellEditing();
-                        }
-                        loadProjects();
-                    });
-                }
+                // Remove dashboard and show CanvasScreen for this project
+                parentFrame.getContentPane().removeAll();
+                CanvasScreen canvasScreen = new CanvasScreen(800, 600, Color.WHITE, projectName);
+                canvasScreen.getCanvas().loadLatestAutoSave(projectName);
+                parentFrame.getContentPane().add(canvasScreen);
+                parentFrame.revalidate();
+                parentFrame.repaint();
             }
             isPushed = false;
             return label;
