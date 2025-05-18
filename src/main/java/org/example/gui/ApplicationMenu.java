@@ -23,14 +23,14 @@ public class ApplicationMenu extends JMenuBar {
         JMenuItem openFile = new JMenuItem("Open");
         JMenuItem saveFile = new JMenuItem("Save");
         JMenuItem saveAsFile = new JMenuItem("Save As..");
-        JMenuItem returnToDashboard = new JMenuItem("Return to Dashboard"); // Add this line
+        JMenuItem returnToDashboard = new JMenuItem("Return to Dashboard");
 
         fileMenu.add(newFile);
         fileMenu.add(openFile);
         fileMenu.add(saveFile);
         fileMenu.add(saveAsFile);
         fileMenu.addSeparator();
-        fileMenu.add(returnToDashboard); // Add this line
+        fileMenu.add(returnToDashboard);
 
         // Edit menu
         JMenu editMenu = new JMenu("Edit");
@@ -142,7 +142,7 @@ public class ApplicationMenu extends JMenuBar {
         infoPanel.add(centeredLabel("Aleksei KHLOPKOV"));
         infoPanel.add(centeredLabel("Fariz Berke TUTANÇ"));
         infoPanel.add(Box.createVerticalStrut(15));
-        infoPanel.add(centeredLabel("Thanks to Muhammed Arif DAYI (We heard that he got 27cm penis) for beta testing"));
+        infoPanel.add(centeredLabel("Thanks to Muhammed Arif DAYI for beta testing"));
         infoPanel.add(Box.createVerticalStrut(15));
         infoPanel.add(centeredLabel("Licensed under the GNU General Public License v3.0"));
 

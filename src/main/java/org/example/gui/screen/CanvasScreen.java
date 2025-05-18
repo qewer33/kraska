@@ -38,21 +38,23 @@ public class CanvasScreen extends AbstractScreen {
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         topPanel.add(fileOperationsBar);
-        topPanel.add(Box.createRigidArea(new Dimension(380, 0)));
-        topPanel.add(rotateBar);
 
+        // Toolbars
         JPanel topBarContainer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-        topBarContainer.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 170));
+        topBarContainer.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
         CanvasTopSideBar topBar = new CanvasTopSideBar(parentFrame, canvas);
         topBarContainer.add(topBar);
 
+        JPanel centerBarContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        centerBarContainer.setBorder(BorderFactory.createEmptyBorder(0, -200, 0, 0));
+        centerBarContainer.add(rotateBar);
+
         JPanel topWrapper = new JPanel(new BorderLayout());
         topWrapper.add(topPanel, BorderLayout.WEST);
+        topWrapper.add(centerBarContainer, BorderLayout.CENTER);
         topWrapper.add(topBarContainer, BorderLayout.EAST);
 
         this.add(topWrapper, BorderLayout.NORTH);
-
-
 
         CanvasSidebar sidebar = new CanvasSidebar();
         sidebar.updateToolOptions(toolManager.getActiveTool());

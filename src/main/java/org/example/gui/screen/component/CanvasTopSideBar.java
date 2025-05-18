@@ -46,10 +46,10 @@ public class CanvasTopSideBar extends JToolBar {
 
 
     private void openResizeDialog(JFrame parentFrame, Canvas canvas) {
-        JTextField widthField = new JTextField(String.valueOf(canvas.getCanvasSize().width));
-        JTextField heightField = new JTextField(String.valueOf(canvas.getCanvasSize().height));
+        JSpinner widthField = new JSpinner(new SpinnerNumberModel(canvas.getCanvasSize().getWidth(), 1, Integer.MAX_VALUE, 1));
+        JSpinner heightField = new JSpinner(new SpinnerNumberModel(canvas.getCanvasSize().getHeight(), 1, Integer.MAX_VALUE, 1));
 
-        JPanel panel = new JPanel(new GridLayout(2, 2));
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         panel.add(new JLabel("Width:"));
         panel.add(widthField);
         panel.add(new JLabel("Height:"));
@@ -62,8 +62,8 @@ public class CanvasTopSideBar extends JToolBar {
 
         if (result == JOptionPane.OK_OPTION) {
             try {
-                int newWidth = Integer.parseInt(widthField.getText());
-                int newHeight = Integer.parseInt(heightField.getText());
+                int newWidth = (int) widthField.getValue();
+                int newHeight = (int) heightField.getValue();
 
                 BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = resized.createGraphics();

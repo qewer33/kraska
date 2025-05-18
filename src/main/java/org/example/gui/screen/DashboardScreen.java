@@ -137,7 +137,7 @@ public class DashboardScreen extends AbstractScreen {
         settingsDialog.add(new JLabel("Canvas Width:"), gbc);
 
         gbc.gridx = 1; gbc.gridy = 2; gbc.gridwidth = 2;
-        JTextField widthField = new JTextField("800", 10);
+        JSpinner widthField = new JSpinner(new SpinnerNumberModel(800, 1, Integer.MAX_VALUE, 1));
         settingsDialog.add(widthField, gbc);
 
         // Height input
@@ -145,7 +145,7 @@ public class DashboardScreen extends AbstractScreen {
         settingsDialog.add(new JLabel("Canvas Height:"), gbc);
 
         gbc.gridx = 1; gbc.gridy = 3; gbc.gridwidth = 2;
-        JTextField heightField = new JTextField("600", 10);
+        JSpinner heightField = new JSpinner(new SpinnerNumberModel(600, 1, Integer.MAX_VALUE, 1));
         settingsDialog.add(heightField, gbc);
 
         // Create Canvas button
@@ -158,8 +158,8 @@ public class DashboardScreen extends AbstractScreen {
         createCanvasButton.addActionListener(event -> {
             try {
                 String projectName = nameField.getText().trim();
-                int width = Integer.parseInt(widthField.getText());
-                int height = Integer.parseInt(heightField.getText());
+                int width = (int) widthField.getValue();
+                int height = (int)heightField.getValue();
                 Color backgroundColor = colorPreviewPanel.getBackground();
 
                 if (projectName.isEmpty()) {
