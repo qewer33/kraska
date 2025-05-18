@@ -16,6 +16,7 @@ import javax.swing.table.TableColumn;
 
 import org.example.db.Project;
 import org.example.db.ProjectDatabase;
+import org.example.gui.ApplicationMenu;
 import org.example.gui.screen.component.DashboardBannerPanel;
 
 public class DashboardScreen extends AbstractScreen {
@@ -125,6 +126,7 @@ public class DashboardScreen extends AbstractScreen {
             parentFrame.getContentPane().add(canvasScreen);
             parentFrame.revalidate();
             parentFrame.repaint();
+            ((ApplicationMenu) parentFrame.getJMenuBar()).enableMenus();
         });
 
         deleteButton.addActionListener(e -> {
@@ -262,6 +264,7 @@ public class DashboardScreen extends AbstractScreen {
                 parentFrame.getContentPane().add(canvasScreen);
                 parentFrame.revalidate();
                 parentFrame.repaint();
+                ((ApplicationMenu) parentFrame.getJMenuBar()).enableMenus();
 
                 settingsDialog.dispose();
             } catch (NumberFormatException ex) {

@@ -62,6 +62,7 @@ public class Application {
         // Show DashboardScreen first
         DashboardScreen dashboardScreen = new DashboardScreen(frame);
         frame.add(dashboardScreen, BorderLayout.CENTER);
+        ((ApplicationMenu) frame.getJMenuBar()).disableMenus();
 
         frame.addWindowListener(new WindowAdapter() {
             @Override

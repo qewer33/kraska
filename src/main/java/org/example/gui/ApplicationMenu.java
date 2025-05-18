@@ -15,9 +15,15 @@ public class ApplicationMenu extends JMenuBar {
     private final ToolManager toolManager = ToolManager.getInstance();
     private final ActionManager actionManager = ActionManager.getInstance();
 
+    private final JMenu fileMenu;
+    private final JMenu editMenu;
+    private final JMenu viewMenu;
+    private final JMenu toolsMenu;
+    private final JMenu helpMenu;
+
     public ApplicationMenu(JFrame parentFrame) {
         // File menu
-        JMenu fileMenu = new JMenu("File");
+        fileMenu = new JMenu("File");
 
         JMenuItem newFile = new JMenuItem("New");
         JMenuItem openFile = new JMenuItem("Open");
@@ -33,7 +39,7 @@ public class ApplicationMenu extends JMenuBar {
         fileMenu.add(returnToDashboard);
 
         // Edit menu
-        JMenu editMenu = new JMenu("Edit");
+        editMenu = new JMenu("Edit");
 
         JMenuItem clearCanvas = new JMenuItem("Clear Canvas");
         JMenuItem resizeCanvas = new JMenuItem("Resize Canvas");
@@ -42,7 +48,7 @@ public class ApplicationMenu extends JMenuBar {
         editMenu.add(resizeCanvas);
 
         // View menu
-        JMenu viewMenu = new JMenu("View");
+        viewMenu = new JMenu("View");
 
         JMenuItem zoomIn = new JMenuItem("Zoom In");
         JMenuItem zoomOut = new JMenuItem("Zoom Out");
@@ -53,7 +59,7 @@ public class ApplicationMenu extends JMenuBar {
         viewMenu.add(zoomReset);
 
         // Tools menu
-        JMenu toolsMenu = new JMenu("Tools");
+        toolsMenu = new JMenu("Tools");
 
         for (AbstractTool tool : toolManager.getTools()) {
             JMenuItem item = new JMenuItem();
@@ -63,7 +69,7 @@ public class ApplicationMenu extends JMenuBar {
         }
 
         // Help menu
-        JMenu helpMenu = new JMenu("Help");
+        helpMenu = new JMenu("Help");
 
         JMenuItem aboutKraska = new JMenuItem("About Kraska");
 
@@ -163,5 +169,19 @@ public class ApplicationMenu extends JMenuBar {
         JLabel label = new JLabel(text);
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         return label;
+    }
+
+    public void disableMenus() {
+        fileMenu.setEnabled(false);
+        editMenu.setEnabled(false);
+        viewMenu.setEnabled(false);
+        toolsMenu.setEnabled(false);
+    }
+
+    public void enableMenus() {
+        fileMenu.setEnabled(true);
+        editMenu.setEnabled(true);
+        viewMenu.setEnabled(true);
+        toolsMenu.setEnabled(true);
     }
 }
