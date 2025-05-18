@@ -62,8 +62,8 @@ public class CanvasTopSideBar extends JToolBar {
 
         if (result == JOptionPane.OK_OPTION) {
             try {
-                int newWidth = (int) widthField.getValue();
-                int newHeight = (int) heightField.getValue();
+                int newWidth = ((Number) widthField.getValue()).intValue();
+                int newHeight = ((Number) heightField.getValue()).intValue();
 
                 BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = resized.createGraphics();
