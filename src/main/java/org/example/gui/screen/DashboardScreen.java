@@ -120,7 +120,7 @@ public class DashboardScreen extends AbstractScreen {
         loadButton.addActionListener(e -> {
             projectDatabase.updateLastOpened(project.getName(), java.time.LocalDateTime.now().toString());
             parentFrame.getContentPane().removeAll();
-            CanvasScreen canvasScreen = new CanvasScreen(800, 600, Color.WHITE, project.getName());
+            CanvasScreen canvasScreen = new CanvasScreen(parentFrame, 800, 600, Color.WHITE, project.getName());
             canvasScreen.getCanvas().loadLatestAutoSave(project.getName());
             parentFrame.getContentPane().add(canvasScreen);
             parentFrame.revalidate();
