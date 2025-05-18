@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -19,8 +22,7 @@ public class DashboardScreen extends AbstractScreen {
     private static DashboardScreen instance;
 
     private final JFrame parentFrame;
-    private final JTable projectTable;
-    private final DefaultTableModel tableModel;
+    private final JPanel projectsPanel;
     private ProjectDatabase projectDatabase = ProjectDatabase.getInstance();
     private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -34,61 +36,140 @@ public class DashboardScreen extends AbstractScreen {
         bannerPanel.newProjectButton.addActionListener(this::openCanvasSettingsWindow);
         add(bannerPanel, BorderLayout.NORTH);
 
-        // Table to display projects
-        String[] columnNames = {"Name", "Created", "Last Updated", "Load", "Delete"};
-        tableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 3 || column == 4; // Only "Load" and "Delete" columns are editable (buttons)
-            }
-        };
-        projectTable = new JTable(tableModel);
-        projectTable.getTableHeader().setReorderingAllowed(false);
+        // Panel to display project cards
+        projectsPanel = new JPanel();
+        projectsPanel.setLayout(new BoxLayout(projectsPanel, BoxLayout.Y_AXIS));
+        projectsPanel.setOpaque(false);
 
-        // Add custom renderers and editors for both action columns
-        TableColumn loadColumn = projectTable.getColumn("Load");
-        loadColumn.setCellRenderer(new ButtonRenderer());
-        loadColumn.setCellEditor(new LoadButtonEditor(new JCheckBox()));
+        JScrollPane scrollPane = new JScrollPane(projectsPanel);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        TableColumn deleteColumn = projectTable.getColumn("Delete");
-        deleteColumn.setCellRenderer(new ButtonRenderer());
-        deleteColumn.setCellEditor(new DeleteButtonEditor(new JCheckBox()));
-
-
-        JScrollPane scrollPane = new JScrollPane(projectTable);
-
-        // Load existing projects into the table
+        // Load existing projects into the panel
         loadProjects();
 
-        // Add table to the center of the layout
+        // Add projects panel to the center of the layout
         add(scrollPane, BorderLayout.CENTER);
     }
 
     private void loadProjects() {
-        // Fetch projects from the local database
+        projectsPanel.removeAll();
         List<Project> projects = projectDatabase.getProjects();
-        tableModel.setRowCount(0); // Clear table before loading
-        // Populate the table
+
         for (Project project : projects) {
-            String createdFormatted;
-            String lastOpenedFormatted;
-            try {
-                createdFormatted = LocalDateTime.parse(project.getCreated()).format(DISPLAY_FORMATTER);
-            } catch (Exception ex) {
-                createdFormatted = project.getCreated();
+            projectsPanel.add(createProjectCard(project));
+            projectsPanel.add(Box.createVerticalStrut(12));
+        }
+
+        projectsPanel.revalidate();
+        projectsPanel.repaint();
+    }
+
+    private JPanel createProjectCard(Project project) {
+        JPanel card = new JPanel();
+        card.setLayout(new BorderLayout(15, 0));
+        card.setBorder(new CompoundBorder(
+                new LineBorder(new Color(180, 180, 180), 1, true),
+                new EmptyBorder(18, 24, 18, 24) // increased top/bottom padding
+        ));
+        card.setBackground(new Color(250, 250, 250, 230));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110)); // increased height
+
+        // Left: Project info
+        JPanel infoPanel = new JPanel();
+        infoPanel.setOpaque(false);
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        JLabel nameLabel = new JLabel(project.getName());
+        nameLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+        JLabel createdLabel = new JLabel("Created: " + formatDate(project.getCreated()));
+        JLabel updatedLabel = new JLabel("Last Opened: " + formatDate(project.getLastOpened()));
+        createdLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
+        updatedLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
+        infoPanel.add(nameLabel);
+        infoPanel.add(Box.createVerticalStrut(4));
+        infoPanel.add(createdLabel);
+        infoPanel.add(updatedLabel);
+        infoPanel.add(Box.createVerticalStrut(2)); // add a small gap after the last label
+
+        // Right: Action buttons
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        buttonPanel.setOpaque(false);
+        JButton loadButton = new JButton("Load");
+        JButton deleteButton = new JButton("Delete");
+
+        // Make buttons bigger
+        Dimension buttonSize = new Dimension(110, 36);
+        Font buttonFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
+        loadButton.setPreferredSize(buttonSize);
+        deleteButton.setPreferredSize(buttonSize);
+        loadButton.setFont(buttonFont);
+        deleteButton.setFont(buttonFont);
+
+        // Center buttons vertically and stack them with a gap
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 20, 0); // 20px gap between buttons
+        gbc.anchor = GridBagConstraints.CENTER;
+        buttonPanel.add(loadButton, gbc);
+
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        buttonPanel.add(deleteButton, gbc);
+
+        loadButton.addActionListener(e -> {
+            projectDatabase.updateLastOpened(project.getName(), java.time.LocalDateTime.now().toString());
+            parentFrame.getContentPane().removeAll();
+            CanvasScreen canvasScreen = new CanvasScreen(800, 600, Color.WHITE, project.getName());
+            canvasScreen.getCanvas().loadLatestAutoSave(project.getName());
+            parentFrame.getContentPane().add(canvasScreen);
+            parentFrame.revalidate();
+            parentFrame.repaint();
+        });
+
+        deleteButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(parentFrame,
+                    "Are you sure you want to delete project \"" + project.getName() + "\"?",
+                    "Delete Project", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                projectDatabase.removeProject(project.getName());
+                // Remove autosave folder
+                String savesRoot = System.getProperty("user.home") + File.separator + "kraska_saves";
+                String safeProjectName = project.getName().replaceAll("[^a-zA-Z0-9\\-_]", "_");
+                File projectDir = new File(savesRoot, safeProjectName);
+                deleteDirectoryRecursively(projectDir);
+                loadProjects();
             }
-            try {
-                lastOpenedFormatted = LocalDateTime.parse(project.getLastOpened()).format(DISPLAY_FORMATTER);
-            } catch (Exception ex) {
-                lastOpenedFormatted = project.getLastOpened();
+        });
+
+        card.add(infoPanel, BorderLayout.CENTER);
+        card.add(buttonPanel, BorderLayout.EAST);
+
+        return card;
+    }
+
+    private String formatDate(String dateStr) {
+        try {
+            return LocalDateTime.parse(dateStr).format(DISPLAY_FORMATTER);
+        } catch (Exception ex) {
+            return dateStr;
+        }
+    }
+
+    private void deleteDirectoryRecursively(File dir) {
+        if (dir.exists()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isDirectory()) {
+                        deleteDirectoryRecursively(f);
+                    } else {
+                        f.delete();
+                    }
+                }
             }
-            tableModel.addRow(new Object[]{
-                    project.getName(),
-                    createdFormatted,
-                    lastOpenedFormatted,
-                    "Load", // Button label
-                    "Delete" // Button label
-            });
+            dir.delete();
         }
     }
 
@@ -191,146 +272,4 @@ public class DashboardScreen extends AbstractScreen {
         settingsDialog.setLocationRelativeTo(parentFrame);
         settingsDialog.setVisible(true);
     }
-
-    // Custom renderer for the "Actions" column
-    private static class ButtonRenderer extends JButton implements TableCellRenderer {
-        public ButtonRenderer() {
-            setOpaque(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setText((value == null) ? "" : value.toString());
-            return this;
-        }
-    }
-
-    // Custom editor for the "Load" button in the "Actions" column
-    private class LoadButtonEditor extends DefaultCellEditor {
-        private final JButton button;
-        private String label;
-        private boolean isPushed;
-
-        public LoadButtonEditor(JCheckBox checkBox) {
-            super(checkBox);
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(e -> fireEditingStopped());
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            label = (value == null) ? "" : value.toString();
-            button.setText(label);
-            isPushed = true;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (isPushed) {
-                int row = projectTable.getSelectedRow();
-                String projectName = (String) tableModel.getValueAt(row, 0);
-
-                // Update last opened time in the database
-                projectDatabase.updateLastOpened(projectName, java.time.LocalDateTime.now().toString());
-
-                // Remove dashboard and show CanvasScreen for this project
-                parentFrame.getContentPane().removeAll();
-                CanvasScreen canvasScreen = new CanvasScreen(parentFrame, 800, 600, Color.WHITE, projectName);
-                canvasScreen.getCanvas().loadLatestAutoSave(projectName);
-                parentFrame.getContentPane().add(canvasScreen);
-                parentFrame.revalidate();
-                parentFrame.repaint();
-            }
-            isPushed = false;
-            return label;
-        }
-
-        private void deleteDirectoryRecursively(File dir) {
-            if (dir.exists()) {
-                File[] files = dir.listFiles();
-                if (files != null) {
-                    for (File f : files) {
-                        if (f.isDirectory()) {
-                            deleteDirectoryRecursively(f);
-                        } else {
-                            f.delete();
-                        }
-                    }
-                }
-                dir.delete();
-            }
-        }
-    }
-
-    // Custom editor for the "Delete" button in the "Actions" column
-    private class DeleteButtonEditor extends DefaultCellEditor {
-        private final JButton button;
-        private String label;
-        private boolean isPushed;
-
-        public DeleteButtonEditor(JCheckBox checkBox) {
-            super(checkBox);
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(e -> fireEditingStopped()); // This is correct!
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            label = (value == null) ? "" : value.toString();
-            button.setText(label);
-            isPushed = true;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (isPushed) {
-                // Get project name BEFORE modifying the table
-                int row = projectTable.getSelectedRow();
-                String projectName = (String) tableModel.getValueAt(row, 0);
-
-                int confirm = JOptionPane.showConfirmDialog(parentFrame,
-                        "Are you sure you want to delete project \"" + projectName + "\"?",
-                        "Delete Project", JOptionPane.YES_NO_OPTION);
-
-                if (confirm == JOptionPane.YES_OPTION) {
-                    // Remove from database and memory
-                    projectDatabase.removeProject(projectName);
-
-                    // Remove autosave folder
-                    String savesRoot = System.getProperty("user.home") + File.separator + "kraska_saves";
-                    String safeProjectName = projectName.replaceAll("[^a-zA-Z0-9\\-_]", "_");
-                    File projectDir = new File(savesRoot, safeProjectName);
-                    deleteDirectoryRecursively(projectDir);
-
-                    // Refresh the table after deletion, but only after editing is fully stopped
-                    SwingUtilities.invokeLater(() -> loadProjects());
-                }
-            }
-            isPushed = false;
-            return label;
-        }
-
-        private void deleteDirectoryRecursively(File dir) {
-            if (dir.exists()) {
-                File[] files = dir.listFiles();
-                if (files != null) {
-                    for (File f : files) {
-                        if (f.isDirectory()) {
-                            deleteDirectoryRecursively(f);
-                        } else {
-                            f.delete();
-                        }
-                    }
-                }
-                dir.delete();
-            }
-        }
-    }
-    public static DashboardScreen getInstance() {return instance;}
-
-    public static void setInstance(DashboardScreen screen) {instance = screen;}
 }
