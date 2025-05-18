@@ -4,11 +4,11 @@ import org.example.app.ActionManager;
 import org.example.app.tool.AbstractTool;
 import org.example.app.tool.ToolManager;
 import org.example.gui.screen.DashboardScreen;
+import org.example.gui.screen.ScreenManager;
 import org.example.app.file.AppFile;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.Objects;
 
 public class ApplicationMenu extends JMenuBar {
@@ -21,7 +21,7 @@ public class ApplicationMenu extends JMenuBar {
     private final JMenu toolsMenu;
     private final JMenu helpMenu;
 
-    public ApplicationMenu(JFrame parentFrame) {
+    public ApplicationMenu() {
         // File menu
         fileMenu = new JMenu("File");
 
@@ -123,10 +123,7 @@ public class ApplicationMenu extends JMenuBar {
 
         // Add action for returning to dashboard
         returnToDashboard.addActionListener(e -> {
-            parentFrame.getContentPane().removeAll();
-            parentFrame.getContentPane().add(new DashboardScreen(parentFrame));
-            parentFrame.revalidate();
-            parentFrame.repaint();
+            ScreenManager.getInstance().switchScreen(ScreenManager.getInstance().getDashboardScreen());
         });
     }
 

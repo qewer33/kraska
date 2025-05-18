@@ -10,9 +10,6 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 import org.example.db.Project;
 import org.example.db.ProjectDatabase;
@@ -123,10 +120,7 @@ public class DashboardScreen extends AbstractScreen {
             parentFrame.getContentPane().removeAll();
             CanvasScreen canvasScreen = new CanvasScreen(parentFrame, 800, 600, Color.WHITE, project.getName());
             canvasScreen.getCanvas().loadLatestAutoSave(project.getName());
-            parentFrame.getContentPane().add(canvasScreen);
-            parentFrame.revalidate();
-            parentFrame.repaint();
-            ((ApplicationMenu) parentFrame.getJMenuBar()).enableMenus();
+            ScreenManager.getInstance().switchScreen(canvasScreen);
         });
 
         deleteButton.addActionListener(e -> {
@@ -261,10 +255,7 @@ public class DashboardScreen extends AbstractScreen {
 
                 parentFrame.getContentPane().removeAll();
                 CanvasScreen canvasScreen = new CanvasScreen(parentFrame, width, height, backgroundColor, projectName);
-                parentFrame.getContentPane().add(canvasScreen);
-                parentFrame.revalidate();
-                parentFrame.repaint();
-                ((ApplicationMenu) parentFrame.getJMenuBar()).enableMenus();
+                ScreenManager.getInstance().switchScreen(canvasScreen);
 
                 settingsDialog.dispose();
             } catch (NumberFormatException ex) {
