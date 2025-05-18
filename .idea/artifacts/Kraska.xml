@@ -1,0 +1,19 @@
+<component name="ArtifactManager">
+  <artifact type="jpackage" name="Kraska">
+    <output-path>$PROJECT_DIR$/out/artifacts/Kraska</output-path>
+    <properties id="jpackage-properties">
+      <options>
+        <option name="version" value="" />
+        <option name="copyright" value="" />
+        <option name="description" value="" />
+        <option name="vendor" value="" />
+        <option name="mainClass" value="org.example.Main" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="Kraska.jar">
+        <element id="module-output" name="Kraska" />
+      </element>
+    </root>
+  </artifact>
+</component>

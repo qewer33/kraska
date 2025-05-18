@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
  * It is the base class of Kraska's painting engine.
  */
 public class Canvas extends JPanel {
+    private final int UNDO_REDO_LIMIT = 50;
+
     private Dimension logicalSize = new Dimension(800, 600);
     private BufferedImage buffer;
     private BufferedImage tempBuffer;
@@ -155,6 +157,7 @@ public class Canvas extends JPanel {
         Graphics2D g2d = copy.createGraphics();
         g2d.drawImage(buffer, 0, 0, null);
         g2d.dispose();
+        if (undoStack.size() >= UNDO_REDO_LIMIT) undoStack.removeFirst();
         undoStack.push(copy);
         redoStack.clear();
         canvasChangedSinceLastSave = true;
@@ -237,6 +240,7 @@ public class Canvas extends JPanel {
     public void undo() {
         if (!undoStack.isEmpty()) {
             redoStack.push(copyCanvas());
+            if (redoStack.size() >= UNDO_REDO_LIMIT) redoStack.removeLast();
             buffer = undoStack.pop();
             repaint();
         }
@@ -245,6 +249,7 @@ public class Canvas extends JPanel {
     public void redo() {
         if (!redoStack.isEmpty()) {
             undoStack.push(copyCanvas());
+            if (undoStack.size() >= UNDO_REDO_LIMIT) undoStack.removeLast();
             buffer = redoStack.pop();
             repaint();
         }
