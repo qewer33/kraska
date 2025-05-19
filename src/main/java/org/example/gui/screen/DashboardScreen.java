@@ -50,7 +50,7 @@ public class DashboardScreen extends AbstractScreen {
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    private void loadProjects() {
+    public void loadProjects() {
         projectsPanel.removeAll();
         List<Project> projects = projectDatabase.getProjects();
 

@@ -52,7 +52,10 @@ public class ScreenManager {
 
         if (screen instanceof DashboardScreen) {
             ((ApplicationMenu) frame.getJMenuBar()).disableMenus();
-            setDashboardScreen((DashboardScreen) screen);
+            DashboardScreen ds = (DashboardScreen) screen;
+            setDashboardScreen(ds);
+            ds.loadProjects();
+
         } else if (screen instanceof CanvasScreen) {
             ((ApplicationMenu) frame.getJMenuBar()).enableMenus();
             setCanvasScreen((CanvasScreen) screen);
