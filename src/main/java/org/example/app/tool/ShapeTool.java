@@ -86,7 +86,11 @@ public class ShapeTool extends AbstractTool implements CanvasPainter, ToolOption
                         current.y = startPoint.y + (int) (Math.sin(angle) * length);
                     }
                     g2d.drawLine(startPoint.x, startPoint.y, current.x, current.y);
-                    shapeBounds.setBounds(startPoint.x, startPoint.y, Math.abs(current.x - startPoint.x), Math.abs(current.y - startPoint.y));
+                    int x = Math.min(startPoint.x, current.x);
+                    int y = Math.min(startPoint.y, current.y);
+                    int w = Math.abs(startPoint.x - current.x);
+                    int h = Math.abs(startPoint.y - current.y);
+                    shapeBounds.setBounds(x, y, w, h);
                 }
                 case RECTANGLE -> {
                     int x = Math.min(startPoint.x, current.x);
