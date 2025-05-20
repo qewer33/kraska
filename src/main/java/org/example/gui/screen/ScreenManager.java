@@ -12,15 +12,14 @@ public class ScreenManager {
     private DashboardScreen dashboardScreen;
     private CanvasScreen canvasScreen;
 
-    private ScreenManager(JFrame frame) {
+    private ScreenManager(JFrame frame, DashboardScreen dashboardScreen) {
         this.frame = frame;
-        this.dashboardScreen = new DashboardScreen(frame);
-        this.canvasScreen = new CanvasScreen(frame, 0, 0, Color.WHITE, "");
+        this.dashboardScreen = dashboardScreen;
     }
 
-    public static ScreenManager getInstance(JFrame frame) {
+    public static ScreenManager getInstance(JFrame frame, DashboardScreen dashboardScreen) {
         if (instance == null) {
-            instance = new ScreenManager(frame);
+            instance = new ScreenManager(frame, dashboardScreen);
         }
         return instance;
     }
@@ -53,8 +52,13 @@ public class ScreenManager {
 
         if (screen instanceof DashboardScreen) {
             ((ApplicationMenu) frame.getJMenuBar()).disableMenus();
+            DashboardScreen ds = (DashboardScreen) screen;
+            setDashboardScreen(ds);
+            ds.loadProjects();
+
         } else if (screen instanceof CanvasScreen) {
             ((ApplicationMenu) frame.getJMenuBar()).enableMenus();
+            setCanvasScreen((CanvasScreen) screen);
         }
     }
 }

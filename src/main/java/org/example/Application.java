@@ -1,13 +1,13 @@
 package org.example;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.example.app.ActionManager;
 import org.example.app.color.ColorManager;
 import org.example.app.tool.ToolManager;
 import org.example.gui.ApplicationMenu;
 import org.example.gui.screen.DashboardScreen;
+import org.example.gui.screen.ScreenManager;
 import org.example.gui.canvas.Canvas;
 
 import javax.swing.*;
@@ -26,6 +26,7 @@ public class Application {
             JFrame mainWindow = createMainWindow(canvas);
             mainWindow.setVisible(true);
         });
+
     }
 
     private void instanciateManagers() {
@@ -57,12 +58,15 @@ public class Application {
         ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icon.png")));
         frame.setIconImage(icon.getImage());
 
-        frame.setJMenuBar(new ApplicationMenu(frame));
+        frame.setJMenuBar(new ApplicationMenu());
+        
 
         // Show DashboardScreen first
         DashboardScreen dashboardScreen = new DashboardScreen(frame);
         frame.add(dashboardScreen, BorderLayout.CENTER);
         ((ApplicationMenu) frame.getJMenuBar()).disableMenus();
+
+        ScreenManager.getInstance(frame, dashboardScreen);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
