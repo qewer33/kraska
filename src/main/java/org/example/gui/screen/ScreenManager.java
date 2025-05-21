@@ -14,6 +14,7 @@ public class ScreenManager {
 
     private ScreenManager(JFrame frame, DashboardScreen dashboardScreen) {
         this.frame = frame;
+        this.canvasScreen = null;
         this.dashboardScreen = dashboardScreen;
     }
 

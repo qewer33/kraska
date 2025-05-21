@@ -2,6 +2,7 @@ package org.example.gui.canvas;
 
 import org.example.app.color.ColorManager;
 import org.example.app.tool.ToolManager;
+import org.example.db.Project;
 import org.example.gui.canvas.selection.SelectionManager;
 
 import javax.swing.*;
@@ -47,17 +48,17 @@ public class Canvas extends JPanel {
 
     public Canvas() {}
 
-    public Canvas(int width, int height, Color backgroundColor, String projectName) {
+    public Canvas(int width, int height, Color backgroundColor, Project project) {
         this.logicalSize = new Dimension(width, height);
-        autosaveExecutor.scheduleAtFixedRate(() -> autoSave(projectName), 5, 5, TimeUnit.SECONDS);
+        autosaveExecutor.scheduleAtFixedRate(() -> autoSave(project.getName()), 5, 5, TimeUnit.SECONDS);
         setPreferredSize(logicalSize);
         setBackground(backgroundColor);
-        initializeCanvas(backgroundColor, projectName);
+        initializeCanvas(backgroundColor, project);
         setupMouseListeners();
         setOpaque(false);
     }
 
-    private void initializeCanvas(Color backgroundColor, String projectName) {
+    private void initializeCanvas(Color backgroundColor, Project project) {
         buffer = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(backgroundColor);
@@ -65,7 +66,7 @@ public class Canvas extends JPanel {
         g2d.dispose();
 
         tempBuffer = new BufferedImage(logicalSize.width, logicalSize.height, BufferedImage.TYPE_INT_ARGB);
-        loadLatestAutoSave(projectName);
+        loadLatestAutoSave(project);
     }
 
     @Override
@@ -208,19 +209,8 @@ public class Canvas extends JPanel {
     }
 
     // Load the latest autosave file if it exists
-    public void loadLatestAutoSave(String projectName) {
-        String savesRoot = System.getProperty("user.home") + File.separator + "kraska_saves";
-        String safeProjectName = projectName.replaceAll("[^a-zA-Z0-9\\-_]", "_");
-        File projectDir = new File(savesRoot, safeProjectName);
-
-        if (!projectDir.exists()) return;
-
-        File[] files = projectDir.listFiles((dir, name) -> name.endsWith(".png"));
-        if (files == null || files.length == 0) return;
-
-        File latest = Arrays.stream(files)
-                .max(Comparator.comparingLong(File::lastModified))
-                .orElse(null);
+    public void loadLatestAutoSave(Project project) {
+        File latest = project.getLatestAutosave();
 
         if (latest != null) {
             try {
