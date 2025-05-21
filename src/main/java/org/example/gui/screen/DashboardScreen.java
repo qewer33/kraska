@@ -315,7 +315,7 @@ public class DashboardScreen extends AbstractScreen {
                 projectDatabase.addProject(project);
 
                 parentFrame.getContentPane().removeAll();
-                CanvasScreen canvasScreen = new CanvasScreen(parentFrame, width, height, backgroundColor, projectName);
+                CanvasScreen canvasScreen = new CanvasScreen(parentFrame, width, height, backgroundColor, project);
                 ScreenManager.getInstance().switchScreen(canvasScreen);
 
                 settingsDialog.dispose();
