@@ -17,19 +17,15 @@ public class CanvasFileOperationsBar extends JToolBar {
 
         // Get images from resource
         ImageIcon newIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/new.png")));
-        ImageIcon openIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/open.png")));
         ImageIcon undoIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/undo.png")));
         ImageIcon redoIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/redo.png")));
         ImageIcon saveIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/save.png")));
         ImageIcon saveAsIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/saveAs.png")));
-        ImageIcon exportIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/fileOperations/export.png")));
 
         // === Tool Buttons ===
         JButton newButton = new JButton(newIcon);
         newButton.addActionListener(e->DashboardScreen.getInstance().openCanvasSettingsWindow(null));
         newButton.setToolTipText("New Canvas");
-        JButton openButton = new JButton(openIcon);
-        openButton.setToolTipText("Open a File");
         JButton undoButton = new JButton(undoIcon);
         undoButton.setToolTipText("Undo the Last 'do'");
         undoButton.addActionListener(e->canvas.undo());
@@ -42,16 +38,10 @@ public class CanvasFileOperationsBar extends JToolBar {
         JButton saveAsButton = new JButton(saveAsIcon);
         saveAsButton.setToolTipText("Save This File As ..");
         saveAsButton.addActionListener(e -> AppFile.getInstance().saveAs());
-        JButton exportButton = new JButton(exportIcon);
-        exportButton.setToolTipText("Export This File");
 
         // Add buttons
         addSeparator(new Dimension(5, 0));
         add(newButton);
-        addSeparator(new Dimension(5, 0));
-        add(openButton);
-        addSeparator(new Dimension(5, 0));
-        add(exportButton);
         addSeparator(new Dimension(5, 0));
         add(saveButton);
         addSeparator(new Dimension(5, 0));
