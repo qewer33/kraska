@@ -5,6 +5,7 @@ import org.example.app.file.AppFile;
 import org.example.app.tool.BrushTool;
 import org.example.app.tool.ColorPickerTool;
 import org.example.app.tool.ToolManager;
+import org.example.db.Project;
 import org.example.gui.ApplicationStatusBar;
 import org.example.gui.canvas.Canvas;
 import org.example.gui.canvas.CanvasViewer;
@@ -18,8 +19,8 @@ public class CanvasScreen extends AbstractScreen {
     Canvas canvas;
     CanvasViewer viewer;
 
-    public CanvasScreen(JFrame parentFrame, int width, int height, Color backgroundColor, String projectName) {
-        this.canvas = new Canvas(width, height, backgroundColor, projectName);
+    public CanvasScreen(JFrame parentFrame, int width, int height, Color backgroundColor, Project project) {
+        this.canvas = new Canvas(width, height, backgroundColor, project);
         this.viewer = new CanvasViewer(this.canvas);
 
         AppFile.setInstance(new AppFile(this.canvas));

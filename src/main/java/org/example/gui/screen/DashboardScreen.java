@@ -2,10 +2,12 @@ package org.example.gui.screen;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -18,6 +20,7 @@ import org.example.db.Project;
 import org.example.db.ProjectDatabase;
 import org.example.gui.ApplicationMenu;
 import org.example.gui.screen.component.DashboardBannerPanel;
+import org.example.gui.screen.component.WrapLayout;
 
 public class DashboardScreen extends AbstractScreen {
     private static DashboardScreen instance;
@@ -35,11 +38,13 @@ public class DashboardScreen extends AbstractScreen {
         // Setup banner
         DashboardBannerPanel bannerPanel = new DashboardBannerPanel();
         bannerPanel.newProjectButton.addActionListener(this::openCanvasSettingsWindow);
+        bannerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
         add(bannerPanel, BorderLayout.NORTH);
 
         // Panel to display project cards
         projectsPanel = new JPanel();
-        projectsPanel.setLayout(new BoxLayout(projectsPanel, BoxLayout.Y_AXIS));
+        projectsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        projectsPanel.setLayout(new WrapLayout(FlowLayout.CENTER, 6, 6));
         projectsPanel.setOpaque(false);
 
         JScrollPane scrollPane = new JScrollPane(projectsPanel);
@@ -67,68 +72,127 @@ public class DashboardScreen extends AbstractScreen {
     }
 
     private JPanel createProjectCard(Project project) {
-        JPanel card = new JPanel();
-        card.setLayout(new BorderLayout(15, 0));
-        card.setBorder(new CompoundBorder(
-                new LineBorder(new Color(180, 180, 180), 1, true),
-                new EmptyBorder(18, 24, 18, 24) // increased top/bottom padding
-        ));
-        card.setBackground(new Color(250, 250, 250, 230));
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110)); // increased height
+        JPanel card = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20); // 20px arc radius
+                g2.dispose();
+            }
 
-        // Left: Project info
+            @Override
+            protected void paintBorder(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.LIGHT_GRAY); // border color
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
+                g2.dispose();
+            }
+        };
+        card.setPreferredSize(new Dimension(300, 285));
+        card.setBorder(new EmptyBorder(10, 10, 10, 10));
+        card.setBackground(new Color(255, 255, 255));
+
+        // Thumbnail on top (centered and square, not stretched)
+        try {
+            ImageIcon originalIcon = new ImageIcon(project.getLatestAutosave().getAbsolutePath());
+            Image originalImage = originalIcon.getImage();
+            int imgWidth = originalImage.getWidth(null);
+            int imgHeight = originalImage.getHeight(null);
+            double targetAspect = 16.0 / 9.0;
+
+            int cropWidth = imgWidth;
+            int cropHeight = (int) (imgWidth / targetAspect);
+
+            if (cropHeight > imgHeight) {
+                cropHeight = imgHeight;
+                cropWidth = (int) (imgHeight * targetAspect);
+            }
+
+            int cropX = (imgWidth - cropWidth) / 2;
+            int cropY = (imgHeight - cropHeight) / 2;
+
+            BufferedImage cropped = new BufferedImage(cropWidth, cropHeight, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = cropped.createGraphics();
+            g.drawImage(originalImage,
+                    0, 0, cropWidth, cropHeight,
+                    cropX, cropY, cropX + cropWidth, cropY + cropHeight,
+                    null);
+            g.dispose();
+
+            int finalWidth = 280; // card width - 2 * 10 padding
+            int finalHeight = (int) (finalWidth * 9.0 / 16.0);
+            Image scaled = cropped.getScaledInstance(finalWidth, finalHeight, Image.SCALE_SMOOTH);
+
+            JLabel thumbnail = new JLabel(new ImageIcon(scaled));
+            thumbnail.setHorizontalAlignment(SwingConstants.CENTER);
+            thumbnail.setPreferredSize(new Dimension(finalWidth, finalHeight));
+
+            card.add(thumbnail, BorderLayout.NORTH);
+
+        } catch (Exception e) {
+            JLabel fallback = new JLabel("No Preview", SwingConstants.CENTER);
+            fallback.setPreferredSize(new Dimension(280, 158));
+            fallback.setOpaque(true);
+            fallback.setBackground(Color.LIGHT_GRAY);
+            card.add(fallback, BorderLayout.NORTH);
+        }
+
+        // Info section
         JPanel infoPanel = new JPanel();
-        infoPanel.setOpaque(false);
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setOpaque(false);
+
         JLabel nameLabel = new JLabel(project.getName());
-        nameLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+        nameLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         JLabel createdLabel = new JLabel("Created: " + formatDate(project.getCreated()));
+        createdLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        createdLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         JLabel updatedLabel = new JLabel("Last Opened: " + formatDate(project.getLastOpened()));
-        createdLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
-        updatedLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 13));
+        updatedLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        updatedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         infoPanel.add(nameLabel);
         infoPanel.add(Box.createVerticalStrut(4));
         infoPanel.add(createdLabel);
         infoPanel.add(updatedLabel);
-        infoPanel.add(Box.createVerticalStrut(2)); // add a small gap after the last label
 
-        // Right: Action buttons
-        JPanel buttonPanel = new JPanel(new GridBagLayout());
-        buttonPanel.setOpaque(false);
+        card.add(infoPanel, BorderLayout.CENTER);
+
+        // Buttons section
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.setOpaque(false);
+        ImageIcon loadIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/dashboard/load.png")));
         JButton loadButton = new JButton("Load");
+        loadButton.setIcon(loadIcon);
+        ImageIcon deleteIcon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/dashboard/delete.png")));
         JButton deleteButton = new JButton("Delete");
+        deleteButton.setIcon(deleteIcon);
+        buttons.add(loadButton);
+        buttons.add(deleteButton);
 
-        // Make buttons bigger
-        Dimension buttonSize = new Dimension(110, 36);
-        Font buttonFont = new Font(Font.SANS_SERIF, Font.BOLD, 15);
-        loadButton.setPreferredSize(buttonSize);
-        deleteButton.setPreferredSize(buttonSize);
-        loadButton.setFont(buttonFont);
-        deleteButton.setFont(buttonFont);
+        card.add(buttons, BorderLayout.SOUTH);
 
-        // Center buttons vertically and stack them with a gap
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.insets = new Insets(0, 0, 20, 0); // 20px gap between buttons
-        gbc.anchor = GridBagConstraints.CENTER;
-        buttonPanel.add(loadButton, gbc);
-
-        gbc.gridy = 1;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        buttonPanel.add(deleteButton, gbc);
-
+        // Load button logic
         loadButton.addActionListener(e -> {
             projectDatabase.updateLastOpened(project.getName(), java.time.LocalDateTime.now().toString());
             parentFrame.getContentPane().removeAll();
-            CanvasScreen canvasScreen = new CanvasScreen(parentFrame, 800, 600, Color.WHITE, project.getName());
-            canvasScreen.getCanvas().loadLatestAutoSave(project.getName());
+            ImageIcon image = new ImageIcon(project.getLatestAutosave().getAbsolutePath());
+            CanvasScreen canvasScreen = new CanvasScreen(parentFrame, image.getIconWidth(), image.getIconHeight(), Color.WHITE, project);
+            canvasScreen.getCanvas().loadLatestAutoSave(project);
             parentFrame.getContentPane().add(canvasScreen);
             parentFrame.revalidate();
             parentFrame.repaint();
             ((ApplicationMenu) parentFrame.getJMenuBar()).enableMenus();
         });
 
+        // Delete button logic
         deleteButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(parentFrame,
                     "Are you sure you want to delete project \"" + project.getName() + "\"?",
@@ -136,7 +200,6 @@ public class DashboardScreen extends AbstractScreen {
 
             if (confirm == JOptionPane.YES_OPTION) {
                 projectDatabase.removeProject(project.getName());
-                // Remove autosave folder
                 String savesRoot = System.getProperty("user.home") + File.separator + "kraska_saves";
                 String safeProjectName = project.getName().replaceAll("[^a-zA-Z0-9\\-_]", "_");
                 File projectDir = new File(savesRoot, safeProjectName);
@@ -144,9 +207,6 @@ public class DashboardScreen extends AbstractScreen {
                 loadProjects();
             }
         });
-
-        card.add(infoPanel, BorderLayout.CENTER);
-        card.add(buttonPanel, BorderLayout.EAST);
 
         return card;
     }
@@ -257,10 +317,11 @@ public class DashboardScreen extends AbstractScreen {
                     }
                 }
 
-                projectDatabase.addProject(new Project(projectName, LocalDateTime.now().toString(), LocalDateTime.now().toString()));
+                Project project = new Project(projectName, LocalDateTime.now().toString(), LocalDateTime.now().toString());
+                projectDatabase.addProject(project);
 
                 parentFrame.getContentPane().removeAll();
-                CanvasScreen canvasScreen = new CanvasScreen(parentFrame, width, height, backgroundColor, projectName);
+                CanvasScreen canvasScreen = new CanvasScreen(parentFrame, width, height, backgroundColor, project);
                 parentFrame.getContentPane().add(canvasScreen);
                 parentFrame.revalidate();
                 parentFrame.repaint();
