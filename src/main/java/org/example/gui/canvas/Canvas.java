@@ -188,7 +188,7 @@ public class Canvas extends JPanel {
         lastSavedTimestamp = System.currentTimeMillis();
         canvasChangedSinceLastSave = false;
 
-        // Optionally, clean up old autosaves (e.g., keep only last 3)
+        // Clean up old autosaves
         File[] files = projectDir.listFiles((dir, name) -> name.endsWith(".png"));
         if (files != null && files.length > 3) {
             Arrays.sort(files, Comparator.comparingLong(File::lastModified));

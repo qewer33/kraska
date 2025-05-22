@@ -78,20 +78,28 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
     @Override
     public void onMousePress(Canvas canvas, MouseEvent e) {
 
+        //Check if there is an active text field
         if (activeTextField != null) return;
         if (e.getButton() != MouseEvent.BUTTON1 && e.getButton() != MouseEvent.BUTTON3) return;
 
+        //Set the drawing color based on which mouse button was pressed
         this.color = e.getButton() == MouseEvent.BUTTON1 ? colorManager.getPrimary() : colorManager.getSecondary();
 
         Point zoomedPoint = e.getPoint();
         point = canvas.getUnzoomedPoint(zoomedPoint);
+
+        // Create a new text field for user input
         activeTextField = new JTextField();
+
+        // Set Font, Background and Bounds
         activeTextField.setFont(new Font(fontName, (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0), (int) (fontSize*canvas.getZoomFactor())));
         activeTextField.setForeground(color);
         activeTextField.setOpaque(false);
         activeTextField.setBackground(new Color(0, 0, 0, 0));
         activeTextField.setBorder(null);
         activeTextField.setBounds(zoomedPoint.x, zoomedPoint.y, 200, (int)((fontSize + 10)*canvas.getZoomFactor()));
+
+        // Listen for changes in the text to update width dynamically
         activeTextField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) { updateWidth(canvas); }
@@ -100,6 +108,8 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
             @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) { updateWidth(canvas); }
         });
+
+        // Focus Listener
         activeTextField.addFocusListener(new java.awt.event.FocusListener() {
             @Override
             public void focusGained(java.awt.event.FocusEvent e) {}
@@ -108,8 +118,12 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
             public void focusLost(java.awt.event.FocusEvent e) {
                 if (activeTextField == null) return;
                 String userText = activeTextField.getText();
+
+                // Remove text field from overlay panel
                 canvas.getViewer().getOverlayPanel().remove(activeTextField);
                 canvas.repaint();
+
+                // Draw text on the canvas if it's not empty
                 if (!userText.isEmpty()) {
                     drawText(canvas, point.x, point.y + fontSize, userText);
                 }
@@ -117,22 +131,29 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
             }
         });
 
+        // Adjust font and width if the canvas zoom factor changes
         canvas.addPropertyChangeListener("zoomFactor", evt -> {
             if (activeTextField == null) return;
             activeTextField.setFont(new Font(fontName, (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0), (int) (fontSize*canvas.getZoomFactor())));
             updateWidth(canvas);
         });
 
+        // Add the text field to the overlay panel and set layout
         canvas.getViewer().getOverlayPanel().setLayout(null);
         canvas.getViewer().getOverlayPanel().add(activeTextField);
         canvas.repaint();
         activeTextField.requestFocus();
 
+        // Finalize text entry with enter
         activeTextField.addActionListener(ev -> {
             if (activeTextField == null) return;
             String userText = activeTextField.getText();
+
+            // Remove text field from overlay panel
             canvas.getViewer().getOverlayPanel().remove(activeTextField);
             canvas.repaint();
+
+            // Draw text if not empty
             if (!userText.isEmpty()) {
                 drawText(canvas, point.x, point.y + fontSize, userText);
             }
@@ -140,6 +161,7 @@ public class TextTool extends AbstractTool implements CanvasPainter, ToolOptions
         });
     }
 
+    // Dynamically updates the width and position of the active text field based on its content and the current canvas zoom level.
     private void updateWidth(Canvas canvas) {
         FontMetrics fm = activeTextField.getFontMetrics(activeTextField.getFont());
         int textWidth = fm.stringWidth(activeTextField.getText());
